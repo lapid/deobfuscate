@@ -42,3 +42,7 @@ def in_scope(tricks: list[str], level: str) -> bool:
     """Whether a deobfuscator at ``level`` is expected to undo all of ``tricks``."""
     limit = LEVELS.index(level)
     return all(LEVELS.index(TRICK_LEVEL[trick]) <= limit for trick in tricks)
+
+
+# Tricks the step record cannot tell apart, mapped to the name it reports.
+RECORDED_AS = {"base64url": "base64"}

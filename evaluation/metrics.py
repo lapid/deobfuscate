@@ -4,7 +4,7 @@ import statistics
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from evaluation.tricks import LEVELS, in_scope
+from evaluation.tricks import LEVELS, RECORDED_AS, in_scope
 
 LENGTH_BUCKETS = (("under 20", 0, 20), ("20 to 59", 20, 60), ("60 to 149", 60, 150), ("150 and over", 150, 10**9))
 
@@ -136,7 +136,7 @@ def score(outcomes: list[Outcome], level: str) -> Report:
 
         expected_here = counts_at(sample, level)
         if tricks != ["unknown"]:
-            gold, found = set(tricks), set(outcome.transforms)
+            gold, found = {RECORDED_AS.get(trick, trick) for trick in tricks}, set(outcome.transforms)
             for name in gold & found:
                 report.transform_true[name] += 1
             for name in found - gold:

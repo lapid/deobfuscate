@@ -21,7 +21,7 @@ def nfkc(text: str) -> tuple[str, list[str]]:
 
 def ours(level: str) -> System:
     def run(text: str) -> tuple[str, list[str]]:
-        result = deobfuscate(text, strictness=level)
+        result = deobfuscate(text, strictness=level, raise_errors=True)
         return result.text, [step.transform for step in result.steps]
 
     return run

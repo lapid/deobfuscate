@@ -113,21 +113,28 @@ How to run and read it: `docs/evaluation.md`.
 
 ## Phase 2 — Core engine
 
-- [ ] Transform interface: find candidate spans, propose decoded text, name itself
-- [ ] "Leave alone" recognisers: URLs, emails, paths, hashes, UUIDs, key-like tokens
-- [ ] Script lookup for mixed-script detection (`unicodedata` has no script property)
-- [ ] Plausibility scorer (how much does this look like real language?)
-  - [ ] Cheap pre-checks first: valid UTF-8, printable, entropy drop
-  - [ ] Word list generated from SCOWL (size 60 to start), shipped with its notice
-  - [ ] Character n-gram table built by our own script from public-domain English text
-  - [ ] Choose the public-domain corpus; check its fit on modern text
-  - [ ] Compare word-hit rate, n-gram score, and both on the dev set
-  - [ ] Minimum-length rule: decline to judge spans that are too short
-- [ ] Acceptance rule: apply a candidate only if the score improves by a margin
-- [ ] Strictness levels as presets of margin and enabled transform groups; `conservative` is the default
-- [ ] Loop to a fixed point for nested layers, with a depth limit
-- [ ] Record each accepted step with its span and before/after text
-- [ ] Input size limit and safe failure (return input unchanged on any error)
+How it works: `docs/architecture.md`. The scorer and its experiment: `docs/scorer.md`.
+
+- [x] Transform interface: propose candidate spans; the engine judges (`transforms/base.py`)
+- [x] "Leave alone" recognisers: URLs, emails, paths, hashes, UUIDs, colour codes (`protect.py`)
+- [ ] "Leave alone" recogniser for key-like tokens and for code
+- [x] Script lookup for mixed-script detection (`scripts.py`)
+- [x] Plausibility scorer (`scorer.py`)
+  - [x] Cheap pre-checks: valid UTF-8 and printable (in the base64 transform)
+  - [ ] Entropy-drop pre-check (not needed so far)
+  - [x] Word list generated from SCOWL at size 60, shipped with its notice
+  - [x] Character four-gram table built by `tools/build_data.py` from twenty public-domain books
+  - [x] Compared word coverage, sequence fit, and both on the dev set; both are used
+  - [x] Minimum-length rule: a proposal needs a minimum number of letters to be judged
+  - [ ] Check the four-gram table's fit on modern text more closely
+- [x] Acceptance rule: minimum score and minimum gain over the text replaced
+- [x] Strictness levels as presets; `conservative` is the default
+- [x] Layers: each replacement is itself deobfuscated before judging, at most 4 deep
+- [x] Each accepted step recorded with its span and before/after text
+- [x] Input size limit and safe failure
+- [x] Two proof transforms: `base64` and `rot13`
+- [ ] Tune the `balanced` and `aggressive` presets (Phase 4); they currently let rot13 change
+      some clean texts
 
 ## Phase 3 — Transforms, safest first
 
@@ -141,9 +148,10 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
   - [ ] URL percent-encoding
   - [ ] Backslash escapes (`\x41`, `A`)
 - [ ] **Encodings that need detection**
-  - [ ] Base64 (and URL-safe variant)
+  - [x] Base64 (and URL-safe variant)
   - [ ] Hex, binary, decimal character codes
-  - [ ] ROT13 and other Caesar shifts
+  - [x] ROT13
+  - [ ] Other Caesar shifts
   - [ ] Reversed text
 - [ ] **Ambiguous, high risk**
   - [ ] Homoglyphs: map built from the non-ASCII-to-ASCII subset of `confusables.txt`; per word,

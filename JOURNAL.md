@@ -395,12 +395,39 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
   screening for personal data and abuse before anything is published; the sample will be biased
   toward odd cases.
 
+### 2026-10-08 — Core engine built (Phase 2; design decided by Claude)
+- **Decision:** transforms only propose replacements; the engine judges every proposal with the
+  plausibility scorer and applies the best one, repeating until nothing is accepted.
+- **Layers by recursion:** before judging, the engine deobfuscates the replacement itself, up to
+  4 layers deep, and judges the final result.
+  - **Why:** the first decode of layered text (base64 inside base64) is not English, so judging
+    it directly would reject it.
+  - **Rejected:** a separate search over chains of decoders; the recursion gives the same result
+    with one mechanism.
+- **Result on dev, conservative:** 0 of 7,442 clean texts changed; whole-text base64 94%
+  recovered, base64 in base64 96%, rot13 over base64 98%, whole-text rot13 90%.
+- **Known problem:** at `balanced` and `aggressive` the starting presets let rot13 change clean
+  texts (4 and 20 of 7,442). To be tuned in Phase 4.
+
+### 2026-10-08 — Scorer: word coverage and four-letter sequence fit, averaged (decided by experiment)
+- **Decision:** use both signals with equal weight. Details and numbers in `docs/scorer.md`.
+- **Why:** on dev, each separates clean text from wrong decodes almost perfectly from 20
+  characters up; the combination is never worse than either; under 20 characters neither is
+  reliable, which is handled by requiring a minimum number of letters.
+- **Data:** SCOWL 2020.12.07 at size 60 for the word list; four-gram counts from twenty
+  public-domain books that are not in the evaluation corpus.
+- **Resolves:** the open questions on the public-domain corpus and on resource limits (100,000
+  characters, 4 layers, 200 replacements).
+
+### 2026-10-08 — Step-record names: `base64url` is reported as `base64` (decided by Claude)
+- **Decision:** the tool reports both alphabets as `base64`; the evaluation treats the two
+  labels as one when scoring the step record.
+- **Why:** many URL-safe strings contain neither `-` nor `_` and cannot be told apart.
+
 ## Open questions
 
 None needing an answer from the user.
 
 Settled later by experiment:
 
-1. **Public-domain corpus** for the n-gram table.
-2. **Resource limits:** maximum input size and nesting depth.
-3. **Final v1 targets:** after baselines are measured.
+1. **Final v1 targets:** after the transforms exist and the presets are tuned.

@@ -9,6 +9,8 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 - `PLAN.md`: phased plan with checkboxes. Tick items as they are completed.
 - `docs/research/README.md`: research conclusions and index of notes. Read before designing a transform.
 - `docs/taxonomy.md`: every obfuscation type, its strictness level, and what is out of scope.
+- `docs/architecture.md`: how the engine works and how to add a transform. `docs/scorer.md`: the plausibility scorer.
+- `tools/build_data.py`: rebuilds the data files shipped in `src/deobfuscate/data/` (word list, four-gram table, script table).
 - `docs/evaluation.md`: how the tool is measured, the commands, and the baseline numbers.
 - `src/deobfuscate/`: the package. `evaluation/`: the test-set generator, metrics and runner. `tests/`: unit tests.
 - `data/eval/`: evaluation sets, dev and test, with per-row licences (not MIT). Do not edit by hand.
