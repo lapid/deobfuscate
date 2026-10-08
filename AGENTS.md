@@ -7,9 +7,10 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 
 - `JOURNAL.md`: every decision with its reason, in order. Open questions are at the bottom.
 - `PLAN.md`: phased plan with checkboxes. Tick items as they are completed.
-- `docs/research/README.md`: index of research notes and conclusions (once created).
-- `data/samples/`: collected samples as JSONL (once created).
-- `data/reference/`: vendored data files with version and licence (once created).
+- `docs/research/README.md`: research conclusions and index of notes. Read before designing a transform.
+- `docs/taxonomy.md`: every obfuscation type, its strictness level, and what is out of scope.
+- `data/samples/`: samples as JSONL; format and licences in its README.
+- `data/reference/`: third-party data files, unmodified, with their own licences.
 
 ## Settled constraints
 
@@ -38,6 +39,13 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 - **Offsets:** each step records its span in the text as it stood before that step.
 - **Samples:** commit only those whose licence allows redistribution; otherwise a fetch script
   and labels. No abusive content. The obfuscator ships as evaluation tooling.
+- **Homoglyphs:** use only the non-ASCII-to-ASCII entries of `data/reference/confusables.txt`.
+  Never apply the table directly; it maps `m` to `rn` and `1` to `l`.
+- **Shorthand is not obfuscation:** `l8r`, `sum1`, `4` for "for" stay as written. Leetspeak
+  decoding requires the result to be a known word.
+- **Scorer data:** word list from SCOWL; character n-gram table built by our own script from
+  public-domain text. Not `wordfreq`, not Norvig's files (licences).
+- **Third-party data keeps its own licence** and credit; MIT covers our own work.
 - **Provisional v1 targets:** at most 1% of clean texts changed; 90% exact recovery for lossless
   transforms and encodings; 70% for ambiguous visual tricks.
 - **Evaluation before implementation.** Test sets and metrics come first.

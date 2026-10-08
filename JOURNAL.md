@@ -222,10 +222,59 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Rejected:** Claude's suggestion to start private until the first release.
 - **Consequence:** the "safe to publish" rule applies to every commit from now on, not only at release.
 
+### 2026-10-08 — Research phase done; findings in `docs/research/`
+- **Decision:** Phase 0.5 is closed apart from the sample-collection items left open in `PLAN.md`.
+  Conclusions are in `docs/research/README.md`; the taxonomy is in `docs/taxonomy.md`.
+- **Confirmed by research:** the planned "transforms propose, scorer disposes, depth limit"
+  engine is what Ciphey and CyberChef do; preserving case and leaving non-Latin text alone is
+  supported by a benchmark.
+
+### 2026-10-08 — Homoglyph map: a subset of Unicode `confusables.txt` (decided by Claude from research)
+- **Decision:** Vendor `confusables.txt` (Unicode License V3) and build our map from the entries
+  that go from a non-ASCII character to ASCII. Never apply an entry with an ASCII source.
+- **Why:** the table is made for comparing strings. Applied directly it turns `m` into `rn` and
+  `1` into `l` in clean English.
+- **Rejected:** Unicode NFKC alone; it covers under half of those entries and no cross-script lookalikes.
+
+### 2026-10-08 — Scorer data: SCOWL word list plus our own n-gram table (decided by Claude from research)
+- **Decision:** Ship a word list generated from SCOWL (MIT-like licence, notice kept). Build the
+  character n-gram table ourselves from public-domain English text.
+- **Rejected:** `wordfreq` (data is CC BY-SA 4.0, project frozen, three extra packages);
+  Norvig's n-gram files (no licence stated for the data).
+- **Open:** which public-domain corpus.
+- **Resolves:** open question "scorer data source", except the corpus.
+
+### 2026-10-08 — Text-message shorthand is not obfuscation (decided by Claude from research, to confirm)
+- **Decision:** `l8r`, `sum1`, `4` for "for" and similar are left unchanged, and they join the
+  clean set as hard negatives.
+- **Why:** real messages are full of them; the digits stand for sounds, so visual leetspeak rules
+  give wrong words. Expanding them would be rewriting, not deobfuscating.
+- **Consequence:** leetspeak decoding fires only when the result is a known word.
+
+### 2026-10-08 — Evaluation reports by text length (decided by Claude from research)
+- **Decision:** every metric is also broken down by input length, and the engine may decline to
+  judge short spans.
+- **Why:** both Ciphey and CyberChef state their plausibility checks fail on short text.
+
+### 2026-10-08 — Third-party data is licensed separately
+- **Decision:** files in `data/reference/` and `data/samples/sms_spam_collection.jsonl` keep
+  their own licences (Unicode License V3, CC BY 4.0) and credits. The MIT licence covers our own work.
+- **Note:** this reads "MIT-compatible" as "may be redistributed alongside MIT code with its
+  notice", not "relicensed as MIT".
+
 ## Open questions
 
-Settled later by research or experiment:
+Needs an answer:
 
-1. **Scorer data source:** which n-gram and word-list resource, MIT-compatible.
-2. **Resource limits:** maximum input size and nesting depth.
-3. **Final v1 targets:** after baselines are measured.
+1. **Hidden text in invisible characters** (Unicode tag characters and similar): remove it
+   silently, or reveal the hidden text in the output or the record? Proposed: remove from the
+   text and show the hidden content in the step record.
+2. **Wrong-encoding damage** (`Ã©` for `é`): in scope as accidental mess, or out? Proposed: out
+   of v1; it is a large separate problem that existing tools handle.
+3. **Shorthand left alone:** confirm the entry above.
+
+Settled later by experiment:
+
+4. **Public-domain corpus** for the n-gram table.
+5. **Resource limits:** maximum input size and nesting depth.
+6. **Final v1 targets:** after baselines are measured.
