@@ -274,6 +274,40 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Why:** a large separate problem that dedicated tools already handle.
 - **Consequence:** such text is a clean negative: it must come back unchanged, not be made worse.
 
+### 2026-10-08 — Evaluation harness built (Phase 1)
+- **Decision:** The harness lives in `evaluation/` in the repo and is not part of the installed
+  package. `docs/evaluation.md` explains the sets, the measures and the commands.
+- **Baselines on dev:** returning the input changes 0% of clean texts and recovers 0%. Unicode
+  NFKC changes 0.5% of clean texts (mostly legitimate symbols) and recovers 11.7% at conservative.
+- **Still missing:** a real-world set. All obfuscated samples are synthetic.
+
+### 2026-10-08 — Clean corpus: public-domain books, different books per split (decided by Claude)
+- **Decision:** 2,000 texts per split from five Project Gutenberg books each, all published
+  before 1929. Dev and test share no book.
+- **Why:** public domain, so the sets can be committed; splitting by book prevents an author's
+  phrasing leaking from dev into test.
+- **Accepted cost:** the prose is old and formal. Modern informal text is under-represented.
+- **Consequence:** the scorer's n-gram table must be built from other books than these ten, or
+  the scorer will have seen the evaluation text.
+- **Rejected:** Wikipedia (share-alike licence).
+
+### 2026-10-08 — Transform names are a shared contract (decided by Claude)
+- **Decision:** the names in `evaluation/tricks.py` are used for sample labels, the obfuscator,
+  and `Step.transform`. A sample counts at a strictness level when all its tricks are handled at
+  that level or below.
+- **Why:** per-transform precision and recall compare the step record with the tricks used, so
+  the names must match exactly.
+
+### 2026-10-08 — Tests use the standard library `unittest` (decided by Claude)
+- **Decision:** no test framework dependency.
+- **Why:** keeps the project dependency-free for contributors; the tests are simple.
+
+### 2026-10-08 — Layout: `src/deobfuscate`, `uv_build` backend (decided by Claude)
+- **Decision:** the package is under `src/`, built with `uv_build`; `main.py` is removed. The
+  `deobfuscate` command reads an argument or standard input.
+- **State:** `deobfuscate()` has the final signature and result types but no transforms; it
+  returns its input unchanged.
+
 ## Open questions
 
 None needing an answer from the user.

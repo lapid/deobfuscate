@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Downloaded source data and locally built sets that are not redistributed
+data/cache/
+data/local/

@@ -24,8 +24,8 @@ Mark items done by changing `[ ]` to `[x]`. Decisions and their reasons go in `J
 - [x] Add the `LICENSE` file
 - [x] Name: `deobfuscate`; hosting: `github.com/lapid/deobfuscate`
 - [x] Write the obfuscation taxonomy: `docs/taxonomy.md`
-- [ ] Define the result shape: `text`, plus `steps` of `{transform, span, before, after, confidence}`
-- [ ] Define the interface: `deobfuscate(text) -> Result`, and a CLI (stdin to stdout, `--json` for the record)
+- [x] Result shape: `Result(text, steps)`, each `Step(transform, start, end, before, after, confidence, hidden)`
+- [x] Interface: `deobfuscate(text, strictness=...) -> Result`, and a `deobfuscate` command (`--json` for the record)
 
 ## Phase 0.5 — Research and samples
 
@@ -74,31 +74,38 @@ for us, open questions.
 
 ## Phase 1 — Evaluation harness
 
-- [ ] Pick a clean source corpus (ordinary sentences, varied length)
-- [ ] Write an **obfuscator**: applies each trick to clean text, giving `(obfuscated, original, tricks used)` pairs
-  - [ ] Single-trick cases
-  - [ ] Stacked cases (e.g. leetspeak inside base64, double base64)
-  - [ ] Partial cases (one obfuscated word or span inside clean text)
-- [ ] Build the **clean set** of hard negatives that must come back unchanged
-  - [ ] Numbers and units (`route 66`, `3 apples`, `v2.0`)
-  - [ ] Text-message shorthand (`l8r`, `sum1`, `goin2bed`); sample from the SMS Spam Collection
-  - [ ] Hashes, UUIDs, API-key-like strings (look like hex/base64 but are not text)
-  - [ ] URLs, emails, file paths, code snippets
-  - [ ] Real non-Latin text (Russian, Greek, Hebrew) and mixed-script text
-  - [ ] Emoji, accented names, intentional spacing and punctuation
-  - [ ] Wrong-encoding damage (`Ã©`), which must come back unchanged
-- [ ] Collect a small **real-world set** by hand (synthetic data only tests what we thought of)
-- [ ] Split into dev and test; keep test untouched until reporting
-- [ ] Metrics
-  - [ ] False-change rate on the clean set (headline metric, target near zero)
-  - [ ] Exact-match recovery rate on the obfuscated set
-  - [ ] Character error rate (normalised edit distance) for partial credit
-  - [ ] Per-transform precision and recall, from the recorded steps vs. tricks used
-  - [ ] Idempotence: `deobfuscate(deobfuscate(x)) == deobfuscate(x)`
-  - [ ] Runtime per input
-  - [ ] All of the above broken down by text length (short text is where scorers fail)
-- [ ] One command runs the evaluation and prints a per-category table, for each strictness level
-- [ ] Baselines: identity (return input) and Unicode NFKC only
+How to run and read it: `docs/evaluation.md`.
+
+- [x] Clean source corpus: 2,000 texts per split from public-domain books (`evaluation/corpus.py`)
+- [x] **Obfuscator** (`evaluation/obfuscator.py`): all 20 tricks in the taxonomy
+  - [x] Single-trick cases
+  - [x] Stacked cases (15 two-layer recipes)
+  - [x] Partial cases (a run of words inside clean text)
+- [x] **Clean set** of hard negatives (`evaluation/negatives.py`), 21 categories
+  - [x] Numbers and units
+  - [x] Text-message shorthand (self-written; real SMS sampling still open below)
+  - [x] Hashes, UUIDs, key-like tokens
+  - [x] URLs, emails, file paths, code snippets
+  - [x] Other languages and mixed-script text
+  - [x] Emoji, accented names, symbols, spaced headings, emphasis
+  - [x] Wrong-encoding damage, which must come back unchanged
+- [x] Dev and test splits from different books
+- [x] Metrics (`evaluation/metrics.py`)
+  - [x] False-change rate on the clean set
+  - [x] Exact-match recovery rate
+  - [x] Character error rate, and share of texts made worse
+  - [x] Per-transform precision and recall from the step record
+  - [x] Idempotence
+  - [x] Runtime per input
+  - [x] Breakdown by text length
+- [x] One command runs the evaluation, for each strictness level
+- [x] Baselines: return the input, and Unicode NFKC. Numbers in `docs/evaluation.md`
+- [x] Unit tests for the obfuscator, metrics and package interface
+- [ ] **Real-world set**: none yet. Needs sources of real deliberate obfuscation
+- [ ] Real informal clean text: sample the SMS Spam Collection by script into `data/local/` (not committed)
+- [ ] More short texts (under 20 characters), clean and obfuscated
+- [ ] Larger hand-written categories, or generators for them
+- [ ] Three-layer stacks
 - [ ] Optional comparison baselines, evaluation only, never imported by the tool: ftfy, decancer
 
 ## Phase 2 — Core engine
@@ -153,13 +160,13 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
 ## Phase 5 — Packaging
 
 - [ ] CLI and importable function
-- [ ] Unit tests per transform, plus the evaluation as a regression check
+- [ ] Unit tests per transform, plus the evaluation as a regression check (harness tests exist)
 - [ ] README: usage, what is handled, known limits, current scores
 
 ## Phase 6 — Publishing
 
 - [x] Rename the project in `pyproject.toml`; add description and licence
-- [ ] Turn `main.py` into a `deobfuscate` package; add URLs and a build backend to `pyproject.toml`
+- [x] `deobfuscate` package under `src/`, with URLs and a build backend in `pyproject.toml`
 - [x] `LICENSE` (MIT)
 - [ ] `CONTRIBUTING.md`: how to add a transform, required samples, evaluation gate, data licence rule
 - [ ] Pull-request template, `SECURITY.md`, code of conduct

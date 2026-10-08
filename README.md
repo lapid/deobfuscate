@@ -2,7 +2,7 @@
 
 Takes a text and returns the deobfuscated text, plus a record of which transforms were applied.
 
-**Status: planning. There is no working deobfuscator yet.**
+**Status: the evaluation harness is built; the deobfuscator itself is not. `deobfuscate()` currently returns its input unchanged.**
 
 ## What it will handle
 
@@ -21,6 +21,7 @@ English text only. Code obfuscation is out of scope.
 
 ## How the project is run
 
+- [`docs/evaluation.md`](docs/evaluation.md): how the tool is measured, and the baseline numbers.
 - [`PLAN.md`](PLAN.md): the phased plan and current progress.
 - [`JOURNAL.md`](JOURNAL.md): every decision and its reason.
 - [`AGENTS.md`](AGENTS.md): the settled constraints and working rules, for AI coding agents and people alike.

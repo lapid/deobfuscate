@@ -9,7 +9,10 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 - `PLAN.md`: phased plan with checkboxes. Tick items as they are completed.
 - `docs/research/README.md`: research conclusions and index of notes. Read before designing a transform.
 - `docs/taxonomy.md`: every obfuscation type, its strictness level, and what is out of scope.
-- `data/samples/`: samples as JSONL; format and licences in its README.
+- `docs/evaluation.md`: how the tool is measured, the commands, and the baseline numbers.
+- `src/deobfuscate/`: the package. `evaluation/`: the test-set generator, metrics and runner. `tests/`: unit tests.
+- `data/eval/`: generated evaluation sets, dev and test. Do not edit by hand.
+- `data/samples/`: small hand-made seed samples as JSONL; format and licences in its README.
 - `data/reference/`: third-party data files, unmodified, with their own licences.
 
 ## Settled constraints
@@ -54,6 +57,11 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 
 Proposals not yet confirmed by the user are marked as such in `JOURNAL.md`. Do not treat them as settled.
 
+## Commands
+
+- Tests: `uv run python -m unittest discover -s tests`
+- Evaluation: `uv run python -m evaluation.run` (add `--detail` for per-category tables)
+
 ## Working rules
 
 - Record every decision or change of decision in `JOURNAL.md`, with the reason, and mark
@@ -62,7 +70,9 @@ Proposals not yet confirmed by the user are marked as such in `JOURNAL.md`. Do n
 - Tick `PLAN.md` items when done; add new items rather than working off-plan.
 - Run the evaluation after adding or changing a transform. Keep the change only if the clean set
   stays clean.
-- Never read `split: "test"` samples to get ideas for rules.
+- Never read `split: "test"` samples or `data/eval/test/` to get ideas for rules, and do not tune against the test split.
+- Transform names come from `evaluation/tricks.py`; use exactly those in `Step.transform`.
+- The n-gram table must not be built from the ten books used for the evaluation corpus.
 - Never execute input text. Decode only, within size and depth limits.
 - Research notes hold conclusions and a source link, not copies of articles.
 - Verify claims about external tools, datasets, and licences from the source before relying on them.

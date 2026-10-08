@@ -7,3 +7,13 @@ license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
+
+[project.urls]
+Repository = "https://github.com/lapid/deobfuscate"
+
+[project.scripts]
+deobfuscate = "deobfuscate.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10"]
+build-backend = "uv_build"
