@@ -107,7 +107,9 @@ How to run and read it: `docs/evaluation.md`.
 - [x] More short texts: 200 clean and 86 obfuscated under 20 characters in dev
 - [x] Real deliberate obfuscation, local only: BitCore, 3,000 phishing sentences per split (`evaluation/local_sets.py`)
 - [x] `accent-substitution` trick and Greek lowercase lookalikes added to the generator, after BitCore showed real senders use them
-- [ ] Hand-disguised sentences: 50 waiting in `data/human/to_disguise.txt`; then a loader
+- [x] Hand-disguised sentences: 25 dev and 22 test (`evaluation/human.py`)
+- [ ] Owner to check the test half of the sheet for answers under the wrong sentence
+- [ ] Generator: multi-character leetspeak (`|-|`), mixed-alphabet lookalikes, marks that form accents
 - [ ] Ask the BitCore authors to add a licence
 - [ ] Real samples of encodings (base64 and so on): none yet
 - [ ] Inspect the Zenodo leetspeak spam set (CC BY 4.0) as an independent-generator category

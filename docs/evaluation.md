@@ -41,6 +41,15 @@ generator is `evaluation/obfuscator.py`; the hard negatives are in `evaluation/n
 
 Every result is also reported by origin, so a problem confined to one kind of text is visible.
 
+### Hand-disguised set
+
+`data/eval/human_<split>.jsonl` holds sentences written for this project and disguised by hand
+by the project owner: 25 in dev, 22 in test, MIT-licensed. They are built from
+`data/human/to_disguise.txt` by `uv run python -m evaluation.human` and split by sentence number.
+The tricks are not labelled and the samples count from `balanced` up. Several use disguises that
+are out of scope (misspelling, shorthand, emoji), so read the character error for this origin
+rather than exact recovery. With so few samples, one sentence is 4 points.
+
 ### Local-only real-world set
 
 `data/local/bitcore_<split>.jsonl` holds 3,000 real sentences per split from phishing emails,
@@ -84,6 +93,7 @@ Committed sets:
 | Unicode NFKC | aggressive | 0.3% (24/7442) | 7.9% (420/5284) | 0.1% |
 
 Local-only real-world set (BitCore, 3,000 sentences): both baselines recover 0.0%.
+Hand-disguised set (25 sentences): both baselines recover 0.0%.
 
 NFKC recovers only the styled-alphabet and fullwidth samples, and nothing stacked or real. Its
 false changes are spread over every real source (16 of 7,000 real texts) and hit 5 of the 7

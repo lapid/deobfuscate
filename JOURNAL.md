@@ -362,6 +362,17 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Decision:** the user will disguise sentences supplied by Claude. 50 are in
   `data/human/to_disguise.txt`. The pairs will be MIT-licensed and committed.
 
+### 2026-10-08 — Hand-disguised set added (details decided by Claude)
+- **Decision:** the owner's 50 disguised sentences are split by sentence number into 25 dev and
+  22 test samples (3 were dropped as unchanged or blank) and committed under MIT.
+- **Discipline:** the agent read only the dev half. The sheet itself contains both halves, so
+  agents are told not to read its answers.
+- **Corrections:** answers 12 and 21 sat under the wrong sentence and are re-paired with the
+  sentence they disguise. An answer that was only indented is treated as unchanged.
+- **Finding:** several disguises are out of scope by our rules (misspelling, shorthand, emoji).
+  They stay in the set; character error, now reported per origin, is the measure to read there.
+- **Open:** whether the tool should ever attempt those (it would mean spelling correction).
+
 ## Open questions
 
 None needing an answer from the user.

@@ -24,6 +24,8 @@ LOCAL = ROOT / "data" / "local"
 def load(split: str) -> list[dict]:
     """The committed sets, plus any local-only sets that have been built."""
     paths = [EVAL / split / "clean.jsonl", EVAL / split / "obfuscated.jsonl", *sorted(LOCAL.glob(f"*_{split}.jsonl"))]
+    if (EVAL / f"human_{split}.jsonl").exists():
+        paths.append(EVAL / f"human_{split}.jsonl")
     rows: list[dict] = []
     for path in paths:
         with path.open(encoding="utf-8") as handle:
@@ -66,9 +68,11 @@ def print_report(title: str, report: metrics.Report, detail: bool) -> None:
     print("\nBy kind of sample       recovered")
     for mode in ("whole", "partial", "stacked", "real"):
         print(f"  {mode:<20}  {tally(report.recovered_by_mode[mode])}")
-    print("\nBy origin of the text   clean changed          recovered")
+    print("\nBy origin of the text   clean changed          recovered              character error, before -> after")
     for origin in sorted(set(report.false_change_by_origin) | set(report.recovered_by_origin)):
-        print(f"  {origin:<20}  {tally(report.false_change_by_origin[origin]):<21}  {tally(report.recovered_by_origin[origin])}")
+        errors = report.error_by_origin[origin]
+        change = f"{pct(statistics.fmean(b for b, _ in errors))} -> {pct(statistics.fmean(a for _, a in errors))}" if errors else ""
+        print(f"  {origin:<20}  {tally(report.false_change_by_origin[origin]):<21}  {tally(report.recovered_by_origin[origin]):<21}  {change}")
     if not detail:
         return
 

@@ -100,6 +100,7 @@ class Report:
     recovered_by_mode: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     recovered_by_origin: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     made_worse: Tally = field(default_factory=Tally)
+    error_by_origin: dict[str, list[tuple[float, float]]] = field(default_factory=lambda: defaultdict(list))
     error_rate_before: list[float] = field(default_factory=list)
     error_rate_after: list[float] = field(default_factory=list)
     # Obfuscated set, samples above the strictness level: leaving them alone is acceptable.
@@ -170,4 +171,5 @@ def score(outcomes: list[Outcome], level: str) -> Report:
         # Capped at 1: an encoding can be many times longer than the text it hides.
         report.error_rate_before.append(min(before / scale, 1.0))
         report.error_rate_after.append(min(after / scale, 1.0))
+        report.error_by_origin[sample.get("origin", "unknown")].append((min(before / scale, 1.0), min(after / scale, 1.0)))
     return report

@@ -63,6 +63,20 @@ Each one changed the plan or the journal. Numbers are from the sources in the no
     `η` for n and `τ` for t, which real senders use heavily; they are added. Armenian, Cherokee
     and Runic lookalikes also occur and are not generated yet.
 
+14. **A person disguising text by hand goes well beyond our taxonomy.** In the 25 hand-disguised
+    dev sentences (`data/eval/human_dev.jsonl`):
+    - About a third use lookalike generators that mix many alphabets and accents in one word
+      (Cherokee, Armenian, Greek with accents, symbols such as `¢` for c and `₫` for d). A
+      single-alphabet lookalike table will not cover these.
+    - Some use heavy symbol leetspeak where one letter becomes several characters (`|-|` for H,
+      `|\/|` for M). Our generator only swaps one character for one.
+    - Some are stacked combining marks ("zalgo") that include ordinary accents.
+    - Several are not character tricks at all: misspellings (`pirze`), dropped letters (`gol`),
+      shorthand (`ur`, `TY`), and emoji standing for a word. These are out of scope by our own
+      rules, so exact recovery on this set has a ceiling well below 100%. Character error is the
+      fairer measure there.
+    - Plain base64, URL escapes, reversal and dotted letters also appear, as the taxonomy expects.
+
 ## Not done
 
 - No samples were produced with independent obfuscator tools; those are interactive web pages.
