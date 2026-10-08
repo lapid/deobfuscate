@@ -381,6 +381,20 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
   author's words and would raise the false-change rate.
 - **Accepted cost:** exact recovery on the hand-disguised set has a ceiling below 100%.
 
+### 2026-10-08 — Remaining evaluation gaps move to version 2 (confirmed)
+- **Decision:** the evaluation set is good enough to build v1 against. The remaining gaps are
+  listed under "Version 2" in `PLAN.md` and are not worked on before v1 is released.
+- **Known cost for v1:** recovery numbers for encodings rest on synthetic samples only.
+
+### 2026-10-08 — Version 2 idea: a public demo site that collects samples (proposed by the user)
+- **Idea:** host a site on Netlify or Render where people try the tool, and collect what they
+  submit as evaluation samples.
+- **Why:** it is the most promising source of real obfuscation across genres, including encodings.
+- **Conditions noted by Claude, to settle in v2:** opt-in consent and a licence for submissions;
+  a way to get the correct answer from the visitor, since text without an answer is not a sample;
+  screening for personal data and abuse before anything is published; the sample will be biased
+  toward odd cases.
+
 ## Open questions
 
 None needing an answer from the user.

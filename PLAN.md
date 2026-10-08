@@ -109,14 +109,6 @@ How to run and read it: `docs/evaluation.md`.
 - [x] `accent-substitution` trick and Greek lowercase lookalikes added to the generator, after BitCore showed real senders use them
 - [x] Hand-disguised sentences: 25 dev and 22 test (`evaluation/human.py`)
 - [ ] Owner to check the test half of the sheet for answers under the wrong sentence
-- [ ] Generator: multi-character leetspeak (`|-|`), mixed-alphabet lookalikes, marks that form accents
-- [ ] Ask the BitCore authors to add a licence
-- [ ] Real samples of encodings (base64 and so on): none yet
-- [ ] Inspect the Zenodo leetspeak spam set (CC BY 4.0) as an independent-generator category
-- [ ] Lookalikes from Armenian, Cherokee and Runic in the generator
-- [ ] Test-only trick variants, so the test split checks generalisation
-- [ ] Larger hand-written categories, or generators for them
-- [ ] Three-layer stacks
 - [ ] Optional comparison baselines, evaluation only, never imported by the tool: ftfy, decancer
 
 ## Phase 2 — Core engine
@@ -188,6 +180,39 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
 - [ ] Check that nothing committed is unsafe or unlicensed to publish (samples, vendored data)
 - [x] First commit and push to `github.com/lapid/deobfuscate` (public)
 - [ ] Register the PyPI name
+
+## Version 2
+
+Deferred from v1 by decision on 2026-10-08. Not to be started before v1 is released.
+
+### Evaluation improvements
+
+- [ ] Test-only trick variants, so the test split checks generalisation
+- [ ] Larger hard-negative categories, generated rather than hand-listed
+- [ ] Generator: multi-character leetspeak (`|-|`), mixed-alphabet lookalikes, marks that form
+      accents, lookalikes from Armenian, Cherokee and Runic
+- [ ] Real samples of encodings (base64 and so on)
+- [ ] Real obfuscation from genres other than phishing email
+- [ ] More hand-disguised sentences, through the contribution path
+- [ ] Inspect the Zenodo leetspeak spam set (CC BY 4.0) as an independent-generator category
+- [ ] Ask the BitCore authors to add a licence
+- [ ] Three-layer stacks
+
+### Public demo website that collects samples
+
+A site (Netlify or Render) where anyone can paste text, see the deobfuscated result and the
+steps, and where submissions become evaluation samples.
+
+- [ ] Decide the hosting shape: the tool is pure Python with no dependencies, so it can run in
+      the visitor's browser; collecting samples still needs a small server and a database
+- [ ] Consent: a clear notice that submitted text is stored and may be published; opt-in, not default
+- [ ] Licence for submissions: the visitor agrees to release the text under terms we can commit
+- [ ] Getting answers: ask the visitor whether the result is right and, if not, for the correct
+      text. A submission with no confirmed answer is only a lead, not a sample
+- [ ] Privacy: people will paste personal data and secrets; screen before anything is published
+- [ ] Abuse: rate limits, size limits, and a review step before any submission enters the repo
+- [ ] Keep collected samples out of dev until split, and keep a test share unread
+- [ ] Expect a biased sample: visitors test odd cases, not typical text
 
 ## Later, not in v1
 
