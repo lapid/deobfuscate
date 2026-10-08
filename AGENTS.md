@@ -43,6 +43,8 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
   Never apply the table directly; it maps `m` to `rn` and `1` to `l`.
 - **Shorthand is not obfuscation:** `l8r`, `sum1`, `4` for "for" stay as written. Leetspeak
   decoding requires the result to be a known word.
+- **Hidden text in invisible characters** is removed from the output and shown in the step record.
+- **Wrong-encoding damage** (`Ã©` for `é`) is out of v1 and must come back unchanged.
 - **Scorer data:** word list from SCOWL; character n-gram table built by our own script from
   public-domain text. Not `wordfreq`, not Norvig's files (licences).
 - **Third-party data keeps its own licence** and credit; MIT covers our own work.

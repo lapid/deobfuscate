@@ -16,6 +16,7 @@ column are the `tricks` labels used in `data/samples/`. Reasons are in `docs/res
 | `hex`, `binary`, `decimal-codes` | `48 65 6c 6c 6f` | conservative | Medium. Hashes, UUIDs and colour codes decode to noise and are rejected |
 | `rot13`, `caesar` | `Uryyb jbeyq` | conservative | Medium. Needs enough words; short real words can be rot13 pairs |
 | `reverse` | `dlrow olleH` | conservative | Medium. Needs enough words; palindromes |
+| `tag-characters` | Invisible Unicode tag characters carrying hidden text | conservative | Low. Removed from the text; the hidden content is shown in the step record |
 | `combining-marks` | `H̶e̶l̶l̶o̶` | balanced | Medium. Accents on real letters stay |
 | `homoglyph` | `аccount` with a Cyrillic `а` | balanced | High. Only in mixed-script words, or when the result is a known word |
 | `leetspeak` | `h3ll0`, `p@$$w0rd` | balanced | High. Result must be a known word; shorthand such as `l8r`, `sum1` is left alone |
@@ -25,17 +26,11 @@ column are the `tricks` labels used in `data/samples/`. Reasons are in `docs/res
 Stacked and partial cases are in scope for all of the above: several layers on one span, and an
 obfuscated span inside clean text.
 
-## Undecided
-
-| Trick | Example | Question |
-|---|---|---|
-| `tag-characters` | Invisible Unicode tag characters carrying hidden text | Remove silently, or reveal the hidden text in the output or the record? |
-| Wrong-encoding damage | `ú1.20` for `£1.20`, `Ã©` for `é` | In scope as "accidental mess", or left to tools built for it? Proposed: not in v1 |
-
 ## Out of scope
 
 | Thing | Example | Why |
 |---|---|---|
+| Wrong-encoding damage | `ú1.20` for `£1.20`, `Ã©` for `é` | Not in v1; a separate problem with dedicated tools. Must come back unchanged |
 | Text-message shorthand | `l8r`, `sum1`, `4` for "for" | Abbreviation, not obfuscation; expanding it rewrites the author's words |
 | Spelling mistakes and slang | `recieve`, `gonna` | Not obfuscation |
 | Keyed ciphers | Vigenere, XOR | Needs key search; later |

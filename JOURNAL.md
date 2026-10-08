@@ -244,7 +244,7 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Open:** which public-domain corpus.
 - **Resolves:** open question "scorer data source", except the corpus.
 
-### 2026-10-08 — Text-message shorthand is not obfuscation (decided by Claude from research, to confirm)
+### 2026-10-08 — Text-message shorthand is not obfuscation (confirmed)
 - **Decision:** `l8r`, `sum1`, `4` for "for" and similar are left unchanged, and they join the
   clean set as hard negatives.
 - **Why:** real messages are full of them; the digits stand for sounds, so visual leetspeak rules
@@ -262,19 +262,24 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Note:** this reads "MIT-compatible" as "may be redistributed alongside MIT code with its
   notice", not "relicensed as MIT".
 
+### 2026-10-08 — Hidden text in invisible characters is removed and reported (confirmed)
+- **Decision:** Text carried by invisible characters (Unicode tag characters and similar) is
+  removed from the output text, and the hidden content is shown in the step record.
+- **Why:** the visible text is what the author's reader saw, so that is the output; but silently
+  dropping a hidden message would discard the most interesting fact about the input.
+- **Rejected:** removing silently; inserting the hidden text into the output.
+
+### 2026-10-08 — Wrong-encoding damage is out of v1 (confirmed)
+- **Decision:** Repairing text decoded with the wrong character encoding (`Ã©` for `é`) is not in v1.
+- **Why:** a large separate problem that dedicated tools already handle.
+- **Consequence:** such text is a clean negative: it must come back unchanged, not be made worse.
+
 ## Open questions
 
-Needs an answer:
-
-1. **Hidden text in invisible characters** (Unicode tag characters and similar): remove it
-   silently, or reveal the hidden text in the output or the record? Proposed: remove from the
-   text and show the hidden content in the step record.
-2. **Wrong-encoding damage** (`Ã©` for `é`): in scope as accidental mess, or out? Proposed: out
-   of v1; it is a large separate problem that existing tools handle.
-3. **Shorthand left alone:** confirm the entry above.
+None needing an answer from the user.
 
 Settled later by experiment:
 
-4. **Public-domain corpus** for the n-gram table.
-5. **Resource limits:** maximum input size and nesting depth.
-6. **Final v1 targets:** after baselines are measured.
+1. **Public-domain corpus** for the n-gram table.
+2. **Resource limits:** maximum input size and nesting depth.
+3. **Final v1 targets:** after baselines are measured.

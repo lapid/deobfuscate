@@ -86,6 +86,7 @@ for us, open questions.
   - [ ] URLs, emails, file paths, code snippets
   - [ ] Real non-Latin text (Russian, Greek, Hebrew) and mixed-script text
   - [ ] Emoji, accented names, intentional spacing and punctuation
+  - [ ] Wrong-encoding damage (`Ã©`), which must come back unchanged
 - [ ] Collect a small **real-world set** by hand (synthetic data only tests what we thought of)
 - [ ] Split into dev and test; keep test untouched until reporting
 - [ ] Metrics
@@ -124,6 +125,7 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
 
 - [ ] **Lossless, low risk**
   - [ ] Zero-width and invisible characters
+  - [ ] Hidden text in tag characters: remove, and report the hidden content in the step
   - [ ] Unicode compatibility forms (fullwidth, mathematical alphabets, enclosed letters)
   - [ ] HTML entities
   - [ ] URL percent-encoding

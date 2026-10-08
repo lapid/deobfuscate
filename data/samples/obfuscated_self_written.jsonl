@@ -33,4 +33,4 @@
 {"id": "sw-033", "text": "HTkyLKAyVUAyozDtqTuyVUWypT9lqPOvMJMipzHtEaWcMTS5Yt==", "expected": "Please send the report before Friday.", "tricks": ["rot13", "base64"], "source": "self-written", "split": "dev", "notes": "stacked: rot13 over base64"}
 {"id": "sw-034", "text": "Meet me at the s​t​а​t​i​о​n at 5pm", "expected": "Meet me at the station at 5pm", "tricks": ["zero-width", "homoglyph"], "source": "self-written", "split": "dev", "notes": "stacked, partial span"}
 {"id": "sw-035", "text": "H̶e̶l̶l̶o̶", "expected": "Hello", "tricks": ["combining-marks"], "source": "self-written", "split": "dev", "notes": "strikethrough overlay"}
-{"id": "sw-036", "text": "󠁈󠁥󠁬󠁬󠁯 visible text", "expected": null, "tricks": ["tag-characters"], "source": "self-written", "split": "dev", "notes": "hidden 'Hello' in Unicode tag characters; unclear whether to drop or reveal it"}
+{"id": "sw-036", "text": "󠁈󠁥󠁬󠁬󠁯 visible text", "expected": " visible text", "tricks": ["tag-characters"], "source": "self-written", "split": "dev", "notes": "hidden 'Hello' in Unicode tag characters; removed from the text, and the step record must show 'Hello'"}
