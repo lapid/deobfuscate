@@ -11,7 +11,7 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 - `docs/taxonomy.md`: every obfuscation type, its strictness level, and what is out of scope.
 - `docs/evaluation.md`: how the tool is measured, the commands, and the baseline numbers.
 - `src/deobfuscate/`: the package. `evaluation/`: the test-set generator, metrics and runner. `tests/`: unit tests.
-- `data/eval/`: generated evaluation sets, dev and test. Do not edit by hand.
+- `data/eval/`: evaluation sets, dev and test, with per-row licences (not MIT). Do not edit by hand.
 - `data/samples/`: small hand-made seed samples as JSONL; format and licences in its README.
 - `data/reference/`: third-party data files, unmodified, with their own licences.
 
@@ -50,7 +50,8 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 - **Wrong-encoding damage** (`Ã©` for `é`) is out of v1 and must come back unchanged.
 - **Scorer data:** word list from SCOWL; character n-gram table built by our own script from
   public-domain text. Not `wordfreq`, not Norvig's files (licences).
-- **Third-party data keeps its own licence** and credit; MIT covers our own work.
+- **Third-party data keeps its own licence** and credit; MIT covers our own work. CC BY and
+  CC BY-SA data may be committed, with source, address and licence on every row.
 - **Provisional v1 targets:** at most 1% of clean texts changed; 90% exact recovery for lossless
   transforms and encodings; 70% for ambiguous visual tricks.
 - **Evaluation before implementation.** Test sets and metrics come first.

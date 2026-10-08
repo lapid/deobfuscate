@@ -77,11 +77,13 @@ class Report:
     false_change: Tally = field(default_factory=Tally)
     false_change_by_category: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     false_change_by_length: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
+    false_change_by_origin: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     # Obfuscated set, samples the strictness level is expected to handle.
     recovered: Tally = field(default_factory=Tally)
     recovered_by_category: dict[tuple[str, str], Tally] = field(default_factory=lambda: defaultdict(Tally))
     recovered_by_length: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     recovered_by_mode: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
+    recovered_by_origin: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     made_worse: Tally = field(default_factory=Tally)
     error_rate_before: list[float] = field(default_factory=list)
     error_rate_after: list[float] = field(default_factory=list)
@@ -130,6 +132,7 @@ def score(outcomes: list[Outcome], level: str) -> Report:
             report.false_change.add(changed)
             report.false_change_by_category[sample["category"]].add(changed)
             report.false_change_by_length[length_bucket(expected)].add(changed)
+            report.false_change_by_origin[sample.get("origin", "unknown")].add(changed)
             continue
 
         exact = outcome.output == expected
@@ -143,6 +146,7 @@ def score(outcomes: list[Outcome], level: str) -> Report:
         report.recovered_by_category[(sample["mode"], sample["category"])].add(exact)
         report.recovered_by_length[length_bucket(expected)].add(exact)
         report.recovered_by_mode[sample["mode"]].add(exact)
+        report.recovered_by_origin[sample.get("origin", "unknown")].add(exact)
         report.made_worse.add(after > before)
         scale = max(len(expected), 1)
         # Capped at 1: an encoding can be many times longer than the text it hides.

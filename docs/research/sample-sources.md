@@ -6,6 +6,10 @@ Checked 2026-10-08. A source is "verified" only if its licence page was read tha
 |---|---|---|
 | Self-written, generated with standard-library encoders | Ours, MIT | In `data/samples/` |
 | SMS Spam Collection v.1, archive.ics.uci.edu/dataset/228 | CC BY 4.0 (verified); 5,574 messages | 10 messages in `data/samples/`, with credit |
+| Wikipedia | CC BY-SA 4.0 (verified) | 2,000 texts per split in `data/eval/` |
+| Wikinews | CC BY 2.5, CC BY 4.0 after 2024 (verified) | 1,000 texts per split in `data/eval/` |
+| Stack Exchange | CC BY-SA, version reported per post by its API | 1,500 texts per split in `data/eval/` |
+| Reddit, mainstream news | No open licence | Not usable |
 | SCOWL word lists | MIT-like (verified) | For the scorer, not samples |
 | "The Lies Characters Tell" repo | None stated (verified) | Not usable; offensive content |
 | Mindgard evasion samples | Gated (per search) | Not usable |

@@ -60,8 +60,11 @@ def print_report(title: str, report: metrics.Report, detail: bool) -> None:
     for name, _, _ in metrics.LENGTH_BUCKETS:
         print(f"  {name:<20}  {tally(report.false_change_by_length[name]):<21}  {tally(report.recovered_by_length[name])}")
     print("\nBy kind of sample       recovered")
-    for mode in ("whole", "partial", "stacked"):
+    for mode in ("whole", "partial", "stacked", "real"):
         print(f"  {mode:<20}  {tally(report.recovered_by_mode[mode])}")
+    print("\nBy origin of the text   clean changed          recovered")
+    for origin in sorted(set(report.false_change_by_origin) | set(report.recovered_by_origin)):
+        print(f"  {origin:<20}  {tally(report.false_change_by_origin[origin]):<21}  {tally(report.recovered_by_origin[origin])}")
     if not detail:
         return
 

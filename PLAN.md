@@ -76,7 +76,8 @@ for us, open questions.
 
 How to run and read it: `docs/evaluation.md`.
 
-- [x] Clean source corpus: 2,000 texts per split from public-domain books (`evaluation/corpus.py`)
+- [x] Clean source corpus: 7,000 real texts per split from Wikipedia, Wikinews, Stack Exchange,
+      text messages and public-domain books (`evaluation/sources.py`, `evaluation/corpus.py`)
 - [x] **Obfuscator** (`evaluation/obfuscator.py`): all 20 tricks in the taxonomy
   - [x] Single-trick cases
   - [x] Stacked cases (15 two-layer recipes)
@@ -89,7 +90,7 @@ How to run and read it: `docs/evaluation.md`.
   - [x] Other languages and mixed-script text
   - [x] Emoji, accented names, symbols, spaced headings, emphasis
   - [x] Wrong-encoding damage, which must come back unchanged
-- [x] Dev and test splits from different books
+- [x] Dev and test splits share no document and no text
 - [x] Metrics (`evaluation/metrics.py`)
   - [x] False-change rate on the clean set
   - [x] Exact-match recovery rate
@@ -101,9 +102,11 @@ How to run and read it: `docs/evaluation.md`.
 - [x] One command runs the evaluation, for each strictness level
 - [x] Baselines: return the input, and Unicode NFKC. Numbers in `docs/evaluation.md`
 - [x] Unit tests for the obfuscator, metrics and package interface
-- [ ] **Real-world set**: none yet. Needs sources of real deliberate obfuscation
-- [ ] Real informal clean text: sample the SMS Spam Collection by script into `data/local/` (not committed)
-- [ ] More short texts (under 20 characters), clean and obfuscated
+- [x] Real informal clean text: text messages and Stack Exchange questions
+- [x] First real obfuscated samples: about 135 text messages per split with HTML entities
+- [x] More short texts: 200 clean and 86 obfuscated under 20 characters in dev
+- [ ] **Real deliberate obfuscation**: none yet; needs sources or hand-collected examples
+- [ ] Test-only trick variants, so the test split checks generalisation
 - [ ] Larger hand-written categories, or generators for them
 - [ ] Three-layer stacks
 - [ ] Optional comparison baselines, evaluation only, never imported by the tool: ftfy, decancer

@@ -21,17 +21,24 @@ Run from the repository root.
 
 Each split has two files in `data/eval/<split>/`.
 
-- **`clean.jsonl`** (2,442 texts): must come back unchanged. 2,000 are prose from public-domain
-  books; 442 are generated hard negatives in 21 categories such as hashes, tokens, URLs, paths,
-  code, other languages, shorthand and spaced headings.
-- **`obfuscated.jsonl`** (about 3,360 texts): prose with a trick applied, and the original as
-  `expected`. Three kinds:
-  - **whole:** one trick over the whole text, 100 per trick.
-  - **partial:** one trick on a run of words inside clean text, 40 per trick.
-  - **stacked:** two tricks layered, 40 for each of 15 recipes.
+- **`clean.jsonl`** (7,442 texts): must come back unchanged.
+  - 7,000 real texts: 2,000 from Wikipedia, 1,500 from Stack Exchange questions, 1,500 personal
+    text messages, 1,000 from Wikinews, 1,000 from public-domain books.
+  - 442 generated hard negatives in 21 categories such as hashes, tokens, URLs, paths, code,
+    other languages, shorthand and spaced headings.
+- **`obfuscated.jsonl`** (about 5,020 texts): a trick applied to corpus text, with the original
+  as `expected`. Four kinds:
+  - **whole:** one trick over the whole text, 150 per trick.
+  - **partial:** one trick on a run of words inside clean text, 60 per trick.
+  - **stacked:** two tricks layered, 50 for each of 15 recipes.
+  - **real:** about 135 real text messages containing HTML entities. The only samples not made
+    by our generator.
 
-Dev and test are drawn from different books. The generator is `evaluation/obfuscator.py`; the
-hard negatives are in `evaluation/negatives.py`.
+Dev and test never share a document or a text: books are assigned by title, the rest by a hash
+of the document address. Sources, licences and credits are in `data/eval/README.md`. The
+generator is `evaluation/obfuscator.py`; the hard negatives are in `evaluation/negatives.py`.
+
+Every result is also reported by origin, so a problem confined to one kind of text is visible.
 
 ## The measures
 
@@ -55,26 +62,31 @@ below (`evaluation/tricks.py`).
 
 | System | Scored at | Clean texts changed | Recovered exactly | Made worse |
 |---|---|---|---|---|
-| Return the input | conservative | 0.0% (0/2442) | 0.0% (0/2378) | 0.0% |
-| Return the input | balanced | 0.0% (0/2442) | 0.0% (0/3217) | 0.0% |
-| Return the input | aggressive | 0.0% (0/2442) | 0.0% (0/3357) | 0.0% |
-| Unicode NFKC | conservative | 0.5% (11/2442) | 11.7% (278/2378) | 0.1% |
-| Unicode NFKC | balanced | 0.5% (11/2442) | 8.6% (278/3217) | 0.1% |
-| Unicode NFKC | aggressive | 0.5% (11/2442) | 8.3% (278/3357) | 0.1% |
+| Return the input | conservative | 0.0% (0/7442) | 0.0% (0/3625) | 0.0% |
+| Return the input | balanced | 0.0% (0/7442) | 0.0% (0/4814) | 0.0% |
+| Return the input | aggressive | 0.0% (0/7442) | 0.0% (0/5024) | 0.0% |
+| Unicode NFKC | conservative | 0.3% (24/7442) | 11.6% (420/3625) | 0.1% |
+| Unicode NFKC | balanced | 0.3% (24/7442) | 8.7% (421/4814) | 0.1% |
+| Unicode NFKC | aggressive | 0.3% (24/7442) | 8.4% (421/5024) | 0.1% |
 
-NFKC recovers only the styled-alphabet and fullwidth samples, and nothing stacked. Its 11 false
-changes are mostly legitimate symbols (5 of 7 texts in the `symbols` category), which is why the
-tool does not normalise whole texts.
+NFKC recovers only the styled-alphabet and fullwidth samples, and nothing stacked or real. Its
+false changes are spread over every real source (16 of 7,000 real texts) and hit 5 of the 7
+texts in the `symbols` category, which is why the tool does not normalise whole texts.
 
 The deobfuscator itself has no transforms yet and scores the same as "return the input".
 
 ## Known limits
 
-- **The obfuscated set is synthetic.** It tests the tricks we thought of, written by the same
-  hands as the decoder will be. A real-world set is still to be collected.
-- **The prose is from books published before 1929.** Modern informal text is represented only
-  by the small generated categories.
+- **The obfuscated set is almost all synthetic.** It tests the tricks we thought of, written by
+  the same hands as the decoder will be. The only real samples are text messages with HTML
+  entities. Real deliberate obfuscation is still missing.
+- **"Clean" is an assumption for real text.** Texts containing invisible or control characters
+  were dropped as doubtful (about 35 to 55 per split), but some real texts may still hold
+  genuine obfuscation. Inspect dev false changes before counting them against the tool.
+- **Leetspeak over text messages is ambiguous.** Messages already contain digits that stand for
+  sounds, so some obfuscated samples from that source cannot be recovered exactly by anyone.
 - **Hand-written categories are small** (5 to 22 distinct texts each) and appear in both splits.
-  Only the prose and the randomly generated categories are truly unseen in test.
-- **Few very short texts:** 31 clean texts under 20 characters, and no obfuscated ones.
+- **Same generator in both splits.** Test has unseen text but no unseen trick variants.
+- **The corpus is a frozen sample.** Re-downloading gives different random articles; the
+  committed files are the record.
 - **Test-split discipline is by convention.** Nothing stops a run on it; do not tune against it.

@@ -289,7 +289,7 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Accepted cost:** the prose is old and formal. Modern informal text is under-represented.
 - **Consequence:** the scorer's n-gram table must be built from other books than these ten, or
   the scorer will have seen the evaluation text.
-- **Rejected:** Wikipedia (share-alike licence).
+- **Rejected:** Wikipedia (share-alike licence). Reversed the same day; see "Clean corpus widened".
 
 ### 2026-10-08 — Transform names are a shared contract (decided by Claude)
 - **Decision:** the names in `evaluation/tricks.py` are used for sample labels, the obfuscator,
@@ -307,6 +307,35 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
   `deobfuscate` command reads an argument or standard input.
 - **State:** `deobfuscate()` has the final signature and result types but no transforms; it
   returns its input unchanged.
+
+### 2026-10-08 — Share-alike data is allowed in the repo (confirmed)
+- **Decision:** CC BY-SA and CC BY data files may be committed alongside the MIT code. Each row
+  carries its own source, address and licence; `data/eval/README.md` states the terms.
+- **Why:** needed for modern, varied text. Third-party data already keeps its own licence.
+- **Consequence:** obfuscated versions of such texts are adaptations under the same licence.
+  The MIT licence covers code and our own generated data only.
+- **Supersedes:** Claude's earlier rejection of Wikipedia.
+
+### 2026-10-08 — Clean corpus widened to five real sources (confirmed approach; details by Claude)
+- **Decision:** per split, 2,000 texts from Wikipedia, 1,500 from Stack Exchange questions,
+  1,500 personal text messages, 1,000 from Wikinews, 1,000 from the books. Dev and test share no
+  document and no text.
+- **Why:** the first corpus was 82% formal prose from before 1929; false changes on modern text
+  were unmeasured.
+- **Licences checked:** Wikipedia and Wikinews from their own copyright pages; Stack Exchange
+  from the licence the API reports for each post (its licensing page could not be fetched); the
+  SMS collection from its dataset page.
+- **Rejected:** Reddit (no open licence, terms restrict reuse); mainstream news (copyrighted).
+  Wikinews stands in for news, Stack Exchange and text messages for informal writing.
+- **Details decided by Claude:**
+  - Only personal messages from the SMS collection, not the spam, to keep adult spam out.
+  - Texts containing invisible or control characters are dropped as doubtful labels.
+  - Real messages containing HTML entities become real obfuscated samples, with the decoded
+    text as the expected output.
+  - Wikinews articles from 2005 and 2024 are skipped because the licence changed in those years.
+- **Result:** NFKC baseline on dev changes 0.3% of clean texts (24 of 7,442) and recovers 11.6%
+  at conservative.
+- **Accepted cost:** `data/eval/` is about 18 MB.
 
 ## Open questions
 
