@@ -372,6 +372,14 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Finding:** several disguises are out of scope by our rules (misspelling, shorthand, emoji).
   They stay in the set; character error, now reported per origin, is the measure to read there.
 - **Open:** whether the tool should ever attempt those (it would mean spelling correction).
+  Resolved below: not in v1.
+
+### 2026-10-08 — No spelling correction, shorthand expansion or emoji-to-word in v1 (confirmed)
+- **Decision:** the tool does not try to undo misspellings, dropped letters, shorthand, or emoji
+  standing for a word.
+- **Why:** it would require spelling correction, a larger and riskier feature that rewrites the
+  author's words and would raise the false-change rate.
+- **Accepted cost:** exact recovery on the hand-disguised set has a ceiling below 100%.
 
 ## Open questions
 

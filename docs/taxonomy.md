@@ -33,7 +33,8 @@ obfuscated span inside clean text.
 |---|---|---|
 | Wrong-encoding damage | `ú1.20` for `£1.20`, `Ã©` for `é` | Not in v1; a separate problem with dedicated tools. Must come back unchanged |
 | Text-message shorthand | `l8r`, `sum1`, `4` for "for" | Abbreviation, not obfuscation; expanding it rewrites the author's words |
-| Spelling mistakes and slang | `recieve`, `gonna` | Not obfuscation |
+| Spelling mistakes, dropped letters, slang | `recieve`, `pirze`, `gol`, `gonna` | Would need spelling correction; rewrites the author's words |
+| Emoji standing for a word | 💊 for "medicine" | Meaning, not characters |
 | Keyed ciphers | Vigenere, XOR | Needs key search; later |
 | Code obfuscation | Minified or packed scripts | Different problem |
 | Languages other than English | | Returned unchanged |
