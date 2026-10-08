@@ -27,6 +27,10 @@ Checked 2026-10-08. A source is "verified" only if its licence page was read tha
 | Offensive-tweet homoglyph data ("The Lies Characters Tell") | Real homoglyph use in tweets | None stated | Not usable; offensive |
 | Email spam corpora (SpamAssassin, Enron-Spam, TREC) | Real spam with leetspeak, separators, entities | Not checked | Would need candidate mining and hand labelling |
 
+BitCore is now used as a local-only set (`evaluation/local_sets.py`); what it showed is in
+conclusions 12 and 13 of `README.md`. All 26,591 rows are disguised; none is a clean negative.
+A request to the authors to add a licence has not been sent.
+
 The core difficulty is ground truth, not volume: real obfuscated text has no known original.
 Only three routes give labels: a dataset that ships restorations (BitCore), people obfuscating
 text we chose (labels known by construction), or labelling by hand.

@@ -114,6 +114,15 @@ class ObfuscatorTest(unittest.TestCase):
                 self.assertTrue(new == original or new in obfuscator.LEET[original.lower()])
             self.assertNotEqual(changed, text)
 
+    def test_accent_substitution_only_adds_accents(self):
+        def strip(s):
+            return "".join(c for c in unicodedata.normalize("NFD", s) if not unicodedata.combining(c))
+
+        for text, changed in self.each("accent-substitution"):
+            self.assertEqual(strip(changed), strip(text))
+            self.assertEqual(len(changed), len(text))
+            self.assertNotEqual(changed, text)
+
     def test_separator_and_repetition_keep_the_letters_in_order(self):
         for text, changed in self.each("separator"):
             self.assertEqual([c for c in changed if c.isalpha()], [c for c in text if c.isalpha()])

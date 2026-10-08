@@ -19,8 +19,12 @@ ZERO_WIDTH = ("​", "‌", "‍", "⁠", "﻿")
 # Marks that overlay or sit around a letter without forming a real accented letter.
 OVERLAY_MARKS = ("̲", "̳", "̴", "̵", "̶", "̽", "̿", "͆", "͊", "͋")
 
+# Accents that turn an English letter into a letter of some other Latin alphabet.
+ACCENTS = ("\u0300", "\u0301", "\u0302", "\u0303", "\u0304", "\u0306", "\u0307", "\u0308", "\u030a", "\u030c", "\u0328")
+
 HOMOGLYPHS = {
-    "a": "а", "c": "с", "e": "е", "o": "оο", "p": "р", "x": "х", "y": "у", "i": "і", "j": "ј", "s": "ѕ", "v": "ν",
+    "a": "аα", "c": "с", "e": "е", "o": "оο", "p": "рρ", "x": "х", "y": "у", "i": "іι", "j": "ј", "s": "ѕ", "v": "ν",
+    "n": "η", "t": "τ", "k": "κ", "u": "υ",
     "A": "АΑ", "B": "ВΒ", "C": "С", "E": "ЕΕ", "H": "НΗ", "I": "Ι", "K": "КΚ", "M": "МΜ", "N": "Ν", "O": "ОΟ",
     "P": "РΡ", "T": "ТΤ", "X": "ХΧ", "Y": "Υ", "Z": "Ζ",
 }
@@ -207,6 +211,23 @@ def homoglyph(text: str, rng: Random) -> str:
     return out if out != text else WORD.sub(lambda m: change(m.group()), text)
 
 
+def accent_substitution(text: str, rng: Random) -> str:
+    """Swap letters for accented forms, as real phishing mail does (docs/research/sample-sources.md)."""
+
+    def change(word: str) -> str:
+        out = []
+        for char in word:
+            accented = unicodedata.normalize("NFC", char + rng.choice(ACCENTS))
+            out.append(accented if len(accented) == 1 and rng.random() < 0.35 else char)
+        return "".join(out)
+
+    for _ in range(10):
+        out = _on_some_words(text, rng, change, rate=0.6)
+        if out != text:
+            return out
+    return text
+
+
 def leetspeak(text: str, rng: Random) -> str:
     def change(word: str) -> str:
         spots = [i for i, char in enumerate(word) if char.lower() in LEET]
@@ -253,6 +274,7 @@ TRICKS: dict[str, Callable[[str, Random], str]] = {
     "reverse": reverse,
     "combining-marks": combining_marks,
     "homoglyph": homoglyph,
+    "accent-substitution": accent_substitution,
     "leetspeak": leetspeak,
     "separator": separator,
     "repeated-chars": repeated_chars,
@@ -275,6 +297,7 @@ STACKS = (
     ("zero-width", "leetspeak"),
     ("styled-alphabet", "leetspeak"),
     ("homoglyph", "leetspeak"),
+    ("homoglyph", "accent-substitution"),
 )
 
 

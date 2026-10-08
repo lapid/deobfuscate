@@ -14,6 +14,7 @@ Run from the repository root.
 | `uv run python -m evaluation.run --system identity` | Scores a baseline (`identity` or `nfkc`) |
 | `uv run python -m evaluation.run --split test` | Scores on the test split. For reporting only |
 | `uv run python -m unittest discover -s tests` | Unit tests |
+| `uv run python -m evaluation.local_sets` | Downloads and builds the local-only real-world set (BitCore). Needs network |
 | `uv run python -m evaluation.build` | Rebuilds the sets from the corpus. Output is identical for the same seed |
 | `uv run python -m evaluation.corpus` | Re-downloads the books and rebuilds the corpus |
 
@@ -26,11 +27,11 @@ Each split has two files in `data/eval/<split>/`.
     text messages, 1,000 from Wikinews, 1,000 from public-domain books.
   - 442 generated hard negatives in 21 categories such as hashes, tokens, URLs, paths, code,
     other languages, shorthand and spaced headings.
-- **`obfuscated.jsonl`** (about 5,020 texts): a trick applied to corpus text, with the original
+- **`obfuscated.jsonl`** (about 5,280 texts): a trick applied to corpus text, with the original
   as `expected`. Four kinds:
   - **whole:** one trick over the whole text, 150 per trick.
   - **partial:** one trick on a run of words inside clean text, 60 per trick.
-  - **stacked:** two tricks layered, 50 for each of 15 recipes.
+  - **stacked:** two tricks layered, 50 for each of 16 recipes.
   - **real:** about 135 real text messages containing HTML entities. The only samples not made
     by our generator.
 
@@ -39,6 +40,19 @@ of the document address. Sources, licences and credits are in `data/eval/README.
 generator is `evaluation/obfuscator.py`; the hard negatives are in `evaluation/negatives.py`.
 
 Every result is also reported by origin, so a problem confined to one kind of text is visible.
+
+### Local-only real-world set
+
+`data/local/bitcore_<split>.jsonl` holds 3,000 real sentences per split from phishing emails,
+disguised by their senders, with the restored text from the dataset's authors (BitCore, Lee et
+al. 2025). The dataset states no licence, so it is downloaded by script and never committed;
+`data/local/` is git-ignored. The runner includes it when present and says so when it is not.
+
+- Every version of a sentence goes to the same split, because the same sentence was sent many
+  times with different disguises.
+- The answers are lowercased by the dataset's authors, so these samples are compared ignoring case.
+- The tricks used are not labelled. The samples count from the `balanced` level up and are left
+  out of the step-record precision and recall.
 
 ## The measures
 
@@ -60,14 +74,16 @@ below (`evaluation/tricks.py`).
 
 ## Baselines on the dev split (2026-10-08)
 
+Committed sets:
+
 | System | Scored at | Clean texts changed | Recovered exactly | Made worse |
 |---|---|---|---|---|
-| Return the input | conservative | 0.0% (0/7442) | 0.0% (0/3625) | 0.0% |
-| Return the input | balanced | 0.0% (0/7442) | 0.0% (0/4814) | 0.0% |
-| Return the input | aggressive | 0.0% (0/7442) | 0.0% (0/5024) | 0.0% |
+| Return the input | any level | 0.0% (0/7442) | 0.0% | 0.0% |
 | Unicode NFKC | conservative | 0.3% (24/7442) | 11.6% (420/3625) | 0.1% |
-| Unicode NFKC | balanced | 0.3% (24/7442) | 8.7% (421/4814) | 0.1% |
-| Unicode NFKC | aggressive | 0.3% (24/7442) | 8.4% (421/5024) | 0.1% |
+| Unicode NFKC | balanced | 0.3% (24/7442) | 8.3% (420/5074) | 0.1% |
+| Unicode NFKC | aggressive | 0.3% (24/7442) | 7.9% (420/5284) | 0.1% |
+
+Local-only real-world set (BitCore, 3,000 sentences): both baselines recover 0.0%.
 
 NFKC recovers only the styled-alphabet and fullwidth samples, and nothing stacked or real. Its
 false changes are spread over every real source (16 of 7,000 real texts) and hit 5 of the 7
@@ -77,9 +93,12 @@ The deobfuscator itself has no transforms yet and scores the same as "return the
 
 ## Known limits
 
-- **The obfuscated set is almost all synthetic.** It tests the tricks we thought of, written by
-  the same hands as the decoder will be. The only real samples are text messages with HTML
-  entities. Real deliberate obfuscation is still missing.
+- **The committed obfuscated set is almost all synthetic.** It tests the tricks we thought of,
+  written by the same hands as the decoder will be. Real deliberate obfuscation comes only from
+  the local BitCore set, which covers visual tricks in one kind of text (extortion and phishing
+  email) and nothing else. There is no real sample of an encoding such as base64.
+- **BitCore numbers cannot be reproduced from the repository alone.** Anyone checking them must
+  download the dataset, and it could be withdrawn.
 - **"Clean" is an assumption for real text.** Texts containing invisible or control characters
   were dropped as doubtful (about 35 to 55 per split), but some real texts may still hold
   genuine obfuscation. Inspect dev false changes before counting them against the tool.

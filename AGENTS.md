@@ -12,6 +12,8 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 - `docs/evaluation.md`: how the tool is measured, the commands, and the baseline numbers.
 - `src/deobfuscate/`: the package. `evaluation/`: the test-set generator, metrics and runner. `tests/`: unit tests.
 - `data/eval/`: evaluation sets, dev and test, with per-row licences (not MIT). Do not edit by hand.
+- `data/local/`: git-ignored real-world set (BitCore) built by `uv run python -m evaluation.local_sets`. Never commit it.
+- `data/human/`: sentences for a person to disguise by hand.
 - `data/samples/`: small hand-made seed samples as JSONL; format and licences in its README.
 - `data/reference/`: third-party data files, unmodified, with their own licences.
 

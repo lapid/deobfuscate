@@ -337,6 +337,31 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
   at conservative.
 - **Accepted cost:** `data/eval/` is about 18 MB.
 
+### 2026-10-08 — BitCore used as a local-only real-world set (confirmed, with a caveat)
+- **Decision:** Download BitCore by script and evaluate on it locally. It is never committed.
+- **What it is:** 26,591 real sentences from phishing emails, disguised by their senders, each
+  with the restored text. From Lee et al., "BitAbuse", Findings of NAACL 2025.
+- **Caveat told to the user:** it is public and free to download, but states no licence, so no
+  permission to use or redistribute is written down. The user's go-ahead was conditional on it
+  being "open and free to use"; Claude proceeded on the local-only reading and reported this.
+- **Details decided by Claude:** 3,000 sentences per split; all versions of a sentence go to one
+  split; compared ignoring case because the answers are lowercased; counted from `balanced` up;
+  the 100 rows seen while writing the loader are dev-only.
+- **Not done:** asking the authors to add a licence.
+
+### 2026-10-08 — New trick: accent substitution (decided by Claude from real data)
+- **Decision:** `accent-substitution` (`yōũr`, `taĺk`) joins the taxonomy at `balanced`, and the
+  generator and evaluation sets include it. Greek lowercase lookalikes are added to the generator.
+- **Why:** 44% of real phishing sentences in BitCore's dev half use accented Latin letters, and
+  47% use Greek letters. Neither was generated before.
+- **Tension:** this collides with "real accents stay". It must be decided per word: remove an
+  accent only when the word is not a known word with it and is one without it.
+- **Consequence:** the obfuscated sets were rebuilt, so earlier sample ids no longer match.
+
+### 2026-10-08 — Hand-disguised sentences (confirmed in principle)
+- **Decision:** the user will disguise sentences supplied by Claude. 50 are in
+  `data/human/to_disguise.txt`. The pairs will be MIT-licensed and committed.
+
 ## Open questions
 
 None needing an answer from the user.

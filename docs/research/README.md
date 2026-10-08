@@ -53,6 +53,16 @@ Each one changed the plan or the journal. Numbers are from the sources in the no
     tag characters and other invisible carriers, and combining-mark overlays (strikethrough,
     "zalgo"). Both added to the taxonomy.
 
+12. **Real phishing mail disguises words mostly with letters from other alphabets, one letter
+    for one letter.** In 3,000 real sentences (BitCore, dev half): 47% contain Greek letters,
+    44% accented Latin letters, 37% Cyrillic, 18% other Latin letters, 9% Armenian; 96% have the
+    same length as their answer. Leetspeak, spacing and encodings are almost absent there.
+    Accented Latin (`yōũr`) was not in our taxonomy at all and is now `accent-substitution`.
+    It collides with the rule that real accents stay, so it must be decided per word.
+13. **Our generator's lookalike table was too narrow.** It had no Greek lowercase letters such as
+    `η` for n and `τ` for t, which real senders use heavily; they are added. Armenian, Cherokee
+    and Runic lookalikes also occur and are not generated yet.
+
 ## Not done
 
 - No samples were produced with independent obfuscator tools; those are interactive web pages.

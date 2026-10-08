@@ -157,3 +157,33 @@ def fetch_sms() -> list[dict]:
             docs.append({"text": text.strip(), "source": "SMS Spam Collection v.1 (Almeida and Hidalgo, 2011)",
                          "url": "https://doi.org/10.24432/C5CC84", "licence": "CC BY 4.0"})
     return docs
+
+
+BITCORE = "https://datasets-server.huggingface.co/rows?dataset=AutoML/bitcore&config=default&split=train"
+
+
+def _bitcore() -> list[dict]:
+    rows: list[dict] = []
+    total = None
+    while total is None or len(rows) < total:
+        for attempt in range(6):
+            try:
+                data = json.loads(_get(f"{BITCORE}&offset={len(rows)}&length=100"))
+                break
+            except OSError:
+                time.sleep(5 * (attempt + 1))
+        else:
+            raise RuntimeError(f"BitCore download failed at row {len(rows)}")
+        total = data["num_rows_total"]
+        rows.extend(item["row"] for item in data["rows"])
+        time.sleep(0.3)
+    return rows
+
+
+def fetch_bitcore() -> list[dict]:
+    """Real phishing sentences with visual perturbations and their restored text.
+
+    The dataset states no licence, so it is used locally and never committed.
+    Rows are {"id", "text", "label"}; labels are lowercased by the dataset's authors.
+    """
+    return _cached_json("bitcore.json", _bitcore)

@@ -19,6 +19,7 @@ column are the `tricks` labels used in `data/samples/`. Reasons are in `docs/res
 | `tag-characters` | Invisible Unicode tag characters carrying hidden text | conservative | Low. Removed from the text; the hidden content is shown in the step record |
 | `combining-marks` | `H̶e̶l̶l̶o̶` | balanced | Medium. Accents on real letters stay |
 | `homoglyph` | `аccount` with a Cyrillic `а` | balanced | High. Only in mixed-script words, or when the result is a known word |
+| `accent-substitution` | `yōũr pass words`, `taĺk` | balanced | High. Seen in real phishing mail. Remove an accent only when the word is not a known word with it and is one without it; `café` and names stay |
 | `leetspeak` | `h3ll0`, `p@$$w0rd` | balanced | High. Result must be a known word; shorthand such as `l8r`, `sum1` is left alone |
 | `separator` | `f r e e`, `c.l.i.c.k` | balanced | High. Initials, abbreviations, spaced headings |
 | `repeated-chars` | `heeellooo` | aggressive | High. Emphasis is often intended; several valid collapses |

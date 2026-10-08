@@ -16,13 +16,17 @@ from pathlib import Path
 from evaluation import metrics, systems
 from evaluation.tricks import LEVELS
 
-EVAL = Path(__file__).resolve().parent.parent / "data" / "eval"
+ROOT = Path(__file__).resolve().parent.parent
+EVAL = ROOT / "data" / "eval"
+LOCAL = ROOT / "data" / "local"
 
 
 def load(split: str) -> list[dict]:
+    """The committed sets, plus any local-only sets that have been built."""
+    paths = [EVAL / split / "clean.jsonl", EVAL / split / "obfuscated.jsonl", *sorted(LOCAL.glob(f"*_{split}.jsonl"))]
     rows: list[dict] = []
-    for name in ("clean", "obfuscated"):
-        with (EVAL / split / f"{name}.jsonl").open(encoding="utf-8") as handle:
+    for path in paths:
+        with path.open(encoding="utf-8") as handle:
             rows.extend(json.loads(line) for line in handle)
     return rows
 
@@ -89,6 +93,8 @@ def main() -> None:
     args = parser.parse_args()
 
     samples = load(args.split)
+    if not any(LOCAL.glob(f"*_{args.split}.jsonl")):
+        print("Note: no local-only sets found; run `python -m evaluation.local_sets` to add the real-world samples.")
     for level in args.level or LEVELS:
         system = systems.ours(level) if args.system == "deobfuscate" else getattr(systems, args.system)
         report = metrics.score(run(system, samples), level)

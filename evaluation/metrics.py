@@ -4,7 +4,7 @@ import statistics
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from evaluation.tricks import in_scope
+from evaluation.tricks import LEVELS, in_scope
 
 LENGTH_BUCKETS = (("under 20", 0, 20), ("20 to 59", 20, 60), ("60 to 149", 60, 150), ("150 and over", 150, 10**9))
 
@@ -37,6 +37,21 @@ def edit_distance(a: str, b: str) -> int:
         plus = (minus_h | ~(diagonal | plus_h)) & mask
         minus = plus_h & diagonal
     return score
+
+
+def counts_at(sample: dict, level: str) -> bool:
+    """Whether a deobfuscator at ``level`` is expected to recover this sample.
+
+    Real samples do not say which tricks were used; they carry a level instead.
+    """
+    if "level" in sample:
+        return LEVELS.index(sample["level"]) <= LEVELS.index(level)
+    return in_scope(sample["tricks"], level)
+
+
+def same(a: str, b: str, sample: dict) -> bool:
+    """Equality as the sample defines it: some sources supply lowercased answers."""
+    return a.casefold() == b.casefold() if sample.get("caseless") else a == b
 
 
 def length_bucket(text: str) -> str:
@@ -118,27 +133,30 @@ def score(outcomes: list[Outcome], level: str) -> Report:
         report.seconds.append(outcome.seconds)
         report.idempotent.add(outcome.second_pass == outcome.output)
 
-        gold, found = set(tricks), set(outcome.transforms)
-        for name in gold & found:
-            report.transform_true[name] += 1
-        for name in found - gold:
-            report.transform_false[name] += 1
-        if in_scope(tricks, level):
-            for name in gold - found:
-                report.transform_missed[name] += 1
+        expected_here = counts_at(sample, level)
+        if tricks != ["unknown"]:
+            gold, found = set(tricks), set(outcome.transforms)
+            for name in gold & found:
+                report.transform_true[name] += 1
+            for name in found - gold:
+                report.transform_false[name] += 1
+            if expected_here:
+                for name in gold - found:
+                    report.transform_missed[name] += 1
 
         if not tricks:
-            changed = outcome.output != expected
+            changed = not same(outcome.output, expected, sample)
             report.false_change.add(changed)
             report.false_change_by_category[sample["category"]].add(changed)
             report.false_change_by_length[length_bucket(expected)].add(changed)
             report.false_change_by_origin[sample.get("origin", "unknown")].add(changed)
             continue
 
-        exact = outcome.output == expected
-        before = edit_distance(text, expected)
-        after = 0 if exact else edit_distance(outcome.output, expected)
-        if not in_scope(tricks, level):
+        fold = str.casefold if sample.get("caseless") else str
+        exact = same(outcome.output, expected, sample)
+        before = edit_distance(fold(text), fold(expected))
+        after = 0 if exact else edit_distance(fold(outcome.output), fold(expected))
+        if not expected_here:
             report.out_of_scope_recovered.add(exact)
             report.out_of_scope_made_worse.add(after > before)
             continue

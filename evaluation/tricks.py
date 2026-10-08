@@ -24,6 +24,7 @@ TRICK_LEVEL = {
     "reverse": "conservative",
     "combining-marks": "balanced",
     "homoglyph": "balanced",
+    "accent-substitution": "balanced",
     "leetspeak": "balanced",
     "separator": "balanced",
     "repeated-chars": "aggressive",

@@ -78,9 +78,9 @@ How to run and read it: `docs/evaluation.md`.
 
 - [x] Clean source corpus: 7,000 real texts per split from Wikipedia, Wikinews, Stack Exchange,
       text messages and public-domain books (`evaluation/sources.py`, `evaluation/corpus.py`)
-- [x] **Obfuscator** (`evaluation/obfuscator.py`): all 20 tricks in the taxonomy
+- [x] **Obfuscator** (`evaluation/obfuscator.py`): all 21 tricks in the taxonomy
   - [x] Single-trick cases
-  - [x] Stacked cases (15 two-layer recipes)
+  - [x] Stacked cases (16 two-layer recipes)
   - [x] Partial cases (a run of words inside clean text)
 - [x] **Clean set** of hard negatives (`evaluation/negatives.py`), 21 categories
   - [x] Numbers and units
@@ -105,7 +105,13 @@ How to run and read it: `docs/evaluation.md`.
 - [x] Real informal clean text: text messages and Stack Exchange questions
 - [x] First real obfuscated samples: about 135 text messages per split with HTML entities
 - [x] More short texts: 200 clean and 86 obfuscated under 20 characters in dev
-- [ ] **Real deliberate obfuscation**: none yet; needs sources or hand-collected examples
+- [x] Real deliberate obfuscation, local only: BitCore, 3,000 phishing sentences per split (`evaluation/local_sets.py`)
+- [x] `accent-substitution` trick and Greek lowercase lookalikes added to the generator, after BitCore showed real senders use them
+- [ ] Hand-disguised sentences: 50 waiting in `data/human/to_disguise.txt`; then a loader
+- [ ] Ask the BitCore authors to add a licence
+- [ ] Real samples of encodings (base64 and so on): none yet
+- [ ] Inspect the Zenodo leetspeak spam set (CC BY 4.0) as an independent-generator category
+- [ ] Lookalikes from Armenian, Cherokee and Runic in the generator
 - [ ] Test-only trick variants, so the test split checks generalisation
 - [ ] Larger hand-written categories, or generators for them
 - [ ] Three-layer stacks
@@ -149,6 +155,7 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
   - [ ] Homoglyphs: map built from the non-ASCII-to-ASCII subset of `confusables.txt`; per word,
         in mixed-script words or when the result is a known word
   - [ ] Combining-mark overlays (strikethrough, stacked marks)
+  - [ ] Accent substitution: per word, only when removing the accent turns a non-word into a word
   - [ ] Leetspeak: only when the result is a known word; never on shorthand
   - [ ] Separator insertion (`s p a c e d`, `s.p.l.i.t`)
   - [ ] Repeated characters (`heeellooo`)
