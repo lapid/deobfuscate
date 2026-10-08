@@ -17,6 +17,20 @@ Checked 2026-10-08. A source is "verified" only if its licence page was read tha
 | SpamAssassin corpus, Enron-Spam, Jigsaw, PhishTank, JailbreakBench | Not checked | Open |
 | Independent obfuscator web tools | n/a | Not done; interactive pages |
 
+## Sources of real deliberate obfuscation (checked 2026-10-08)
+
+| Source | What | Licence | Verdict |
+|---|---|---|---|
+| BitCore, huggingface.co/datasets/AutoML/bitcore (paper: arXiv 2502.05225, Findings of NAACL 2025) | 26,591 real sentences from phishing emails with visual perturbations, each paired with its restored text | None stated on the dataset or on github.com/CAU-AutoML/Bitabuse (both checked) | The best match found. Cannot be committed. Local evaluation only, unless the authors add a licence |
+| BitViper, same authors | 298,989 synthetically perturbed sentences | None stated | Synthetic; lower value |
+| "Set of obfuscated spam dataset by using LeetSpeak transformations", zenodo.org/records/6373653 | Public spam corpora with leetspeak applied by the authors' tool | CC BY 4.0 (verified on Zenodo) | Not real obfuscation, but made by a generator we did not write. Contents not inspected |
+| Offensive-tweet homoglyph data ("The Lies Characters Tell") | Real homoglyph use in tweets | None stated | Not usable; offensive |
+| Email spam corpora (SpamAssassin, Enron-Spam, TREC) | Real spam with leetspeak, separators, entities | Not checked | Would need candidate mining and hand labelling |
+
+The core difficulty is ground truth, not volume: real obfuscated text has no known original.
+Only three routes give labels: a dataset that ships restorations (BitCore), people obfuscating
+text we chose (labels known by construction), or labelling by hand.
+
 ## What the SMS data showed
 
 It was expected to supply obfuscated spam. It supplied something more useful: hard negatives.
