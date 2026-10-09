@@ -15,7 +15,8 @@ PATTERNS = (
     re.compile(r"(?<![\w])(?:~|\.{1,2})?/(?:[\w.+-]+/)+[\w.+-]*"),
     re.compile(r"\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b", re.I),
     re.compile(r"(?<![0-9A-Za-z])(?:[0-9a-f]{32}|[0-9a-f]{40}|[0-9a-f]{56}|[0-9a-f]{64}|[0-9a-f]{96}|[0-9a-f]{128})(?![0-9A-Za-z])", re.I),
-    re.compile(r"(?<!\w)#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})\b", re.I),
+    # Not after "&": "&#115;" is an HTML entity, not a colour.
+    re.compile(r"(?<![\w&])#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})\b", re.I),
 )
 
 

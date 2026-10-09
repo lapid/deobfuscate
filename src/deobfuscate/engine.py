@@ -37,9 +37,9 @@ class Policy:
 
 # Starting values; tuned on the dev split in Phase 4.
 POLICIES = {
-    "conservative": Policy(min_score=0.70, min_gain=0.30, min_letters=10),
-    "balanced": Policy(min_score=0.60, min_gain=0.25, min_letters=6),
-    "aggressive": Policy(min_score=0.50, min_gain=0.15, min_letters=4),
+    "conservative": Policy(min_score=0.50, min_gain=0.30, min_letters=10),
+    "balanced": Policy(min_score=0.45, min_gain=0.25, min_letters=6),
+    "aggressive": Policy(min_score=0.40, min_gain=0.15, min_letters=4),
 }
 
 
@@ -51,6 +51,9 @@ class Accepted:
     inner_steps: tuple[Step, ...]
     confidence: float
     gain: float
+    # Gain times the amount of text it was measured on. Proposals are ranked by
+    # this, so a rewrite of the whole text beats the same rewrite of a part of it.
+    weight: float
 
 
 class Engine:
@@ -81,18 +84,26 @@ class Engine:
 
     def best_proposal(self, text: str, depth: int) -> Accepted | None:
         protected = protected_spans(text)
-        best: Accepted | None = None
-        for transform in self.transforms:
-            for candidate in transform.propose(text):
-                before = text[candidate.start : candidate.end]
-                if candidate.replacement == before:
+        # Certain transforms go first, until none applies. Judged transforms then
+        # see text free of invisible characters and escapes, which would otherwise
+        # break words apart and mislead them.
+        for judged in (False, True):
+            best: Accepted | None = None
+            for transform in self.transforms:
+                if transform.judged != judged:
                     continue
-                if not transform.ignores_protection and overlaps(candidate.start, candidate.end, protected):
-                    continue
-                verdict = self.judge(transform, candidate, before, depth)
-                if verdict is not None and (best is None or verdict.gain > best.gain):
-                    best = verdict
-        return best
+                for candidate in transform.propose(text):
+                    before = text[candidate.start : candidate.end]
+                    if candidate.replacement == before:
+                        continue
+                    if not transform.ignores_protection and overlaps(candidate.start, candidate.end, protected):
+                        continue
+                    verdict = self.judge(transform, candidate, before, depth)
+                    if verdict is not None and (best is None or verdict.weight > best.weight):
+                        best = verdict
+            if best is not None:
+                return best
+        return None
 
     def judge(self, transform: Transform, candidate: Candidate, before: str, depth: int) -> Accepted | None:
         key = (transform.name, before, candidate.replacement)
@@ -101,18 +112,18 @@ class Engine:
         found = self.verdicts[key]
         # The cached verdict was reached for the same texts, possibly at another position.
         return None if found is None else Accepted(found.transform, candidate, found.final, found.inner_steps,
-                                                   found.confidence, found.gain)
+                                                   found.confidence, found.gain, found.weight)
 
     def decide(self, transform: Transform, candidate: Candidate, before: str, depth: int) -> Accepted | None:
         final, inner_steps = candidate.replacement, ()
         if depth < MAX_DEPTH:
             final, inner_steps = self.run(candidate.replacement, depth + 1)
         if not transform.judged:
-            return Accepted(transform, candidate, final, inner_steps, 1.0, 1.0)
-        if scorer.letter_count(final) < self.policy.min_letters:
+            return Accepted(transform, candidate, final, inner_steps, 1.0, 1.0, float(len(before)))
+        if scorer.letter_count(final) < max(self.policy.min_letters, transform.min_letters):
             return None
         after_score = scorer.english_score(final)
         gain = after_score - scorer.english_score(before)
         if after_score < self.policy.min_score or gain < self.policy.min_gain:
             return None
-        return Accepted(transform, candidate, final, inner_steps, after_score, gain)
+        return Accepted(transform, candidate, final, inner_steps, after_score, gain, gain * scorer.letter_count(final))

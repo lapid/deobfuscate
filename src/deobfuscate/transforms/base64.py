@@ -3,16 +3,11 @@ import binascii
 import re
 from collections.abc import Iterable
 
-from deobfuscate.transforms.base import Candidate, Transform
+from deobfuscate.transforms.base import Candidate, Transform, is_readable
 
 # A run of base64 characters that is not part of a longer word-like run.
 TOKEN = re.compile(r"(?<![A-Za-z0-9+/=_-])[A-Za-z0-9+/_-]{16,}={0,2}(?![A-Za-z0-9+/=_-])")
 URL_SAFE = str.maketrans("-_", "+/")
-
-
-def is_readable(text: str) -> bool:
-    """No control characters other than ordinary line breaks and tabs."""
-    return all(char.isprintable() or char in "\n\r\t" for char in text)
 
 
 class Base64(Transform):

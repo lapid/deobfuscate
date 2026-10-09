@@ -10,17 +10,22 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 3. Read the document for the area you will touch (table below) before changing anything.
 4. Open `JOURNAL.md` only when you need the reason behind a decision; search it by keyword.
 
-## Current status (updated 2026-10-08)
+## Current status (updated 2026-10-09)
 
 - **Done:** scope and decisions (Phase 0), research (Phase 0.5), evaluation harness (Phase 1),
-  core engine and scorer (Phase 2).
-- **Working now:** nothing in progress. Two transforms exist as proof: `base64` and `rot13`.
-- **Next:** Phase 3, the remaining transforms, safest first. Then Phase 4 (tune the presets,
-  error analysis, final run on test), Phase 5 (packaging), Phase 6 (publishing).
-- **Numbers on dev, `conservative`:** 0 of 7,442 clean texts changed; 18% of obfuscated texts
-  recovered, because 19 of 21 tricks have no transform yet.
-- **Known problems:** `balanced` and `aggressive` presets let rot13 change a few clean texts;
-  rot13 on part of a text recovers only 65%; no recogniser yet for key-like tokens or code.
+  core engine and scorer (Phase 2), and two of three groups of Phase 3.
+- **Phase 3 so far:** the fourteen transforms that run at `conservative` exist: invisible
+  characters, hidden text, styled and fullwidth letters, HTML, URL and backslash escapes, base64,
+  hex, binary, decimal codes, rot13, Caesar shifts, reversal.
+- **Next:** the third group of Phase 3, the ambiguous visual tricks: `homoglyph`,
+  `accent-substitution`, `combining-marks`, `leetspeak`, `separator`, `repeated-chars`. These
+  decide on one word of evidence each, which the scorer has not been tested on. Then Phase 4
+  (tune the presets, error analysis, final run on test), Phase 5, Phase 6.
+- **Numbers on dev, `conservative`:** 1 of 7,442 clean texts changed; 95.5% of obfuscated texts
+  recovered; 0.1% made worse. The real phishing set (0 of 3,000) waits on the third group.
+- **Known problems:** shifted or reversed words inside clean text recover poorly (28% to 68%);
+  texts under 20 characters recover 80%; the presets have not had a tuning pass; no recogniser
+  yet for key-like tokens or code.
 - **Waiting on the owner:** checking the test half of `data/human/to_disguise.txt` for answers
   typed under the wrong sentence.
 - **Deferred to version 2:** see "Version 2" in `PLAN.md` (evaluation gaps, public demo site).

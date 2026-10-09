@@ -23,10 +23,16 @@ def is_word(token: str) -> bool:
 
 
 def word_coverage(text: str) -> tuple[int, int]:
-    """(letters inside known words, letters in all words)."""
+    """(letters inside known words, letters in all words).
+
+    One-letter words are left out of both: "a" and "I" are words, but a text of
+    single letters is no evidence of English.
+    """
     covered = total = 0
     for match in TOKEN.finditer(text):
         token = match.group()
+        if len(token) == 1:
+            continue
         letters = sum(char.isalpha() for char in token)
         total += letters
         if is_word(token):
@@ -64,5 +70,5 @@ def english_score(text: str) -> float:
 
 
 def letter_count(text: str) -> int:
-    """How many letters the text offers as evidence."""
-    return sum(len(match.group()) for match in TOKEN.finditer(text))
+    """How many letters the text offers as evidence. One-letter words do not count."""
+    return sum(len(match.group()) for match in TOKEN.finditer(text) if len(match.group()) > 1)

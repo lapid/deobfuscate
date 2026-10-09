@@ -140,19 +140,20 @@ How it works: `docs/architecture.md`. The scorer and its experiment: `docs/score
 
 Run the evaluation after each one; keep it only if the clean set stays clean.
 
-- [ ] **Lossless, low risk**
-  - [ ] Zero-width and invisible characters
-  - [ ] Hidden text in tag characters: remove, and report the hidden content in the step
-  - [ ] Unicode compatibility forms (fullwidth, mathematical alphabets, enclosed letters)
-  - [ ] HTML entities
-  - [ ] URL percent-encoding
-  - [ ] Backslash escapes (`\x41`, `A`)
-- [ ] **Encodings that need detection**
+- [x] **Lossless, low risk** (dev: 98% to 100% recovered)
+  - [x] Zero-width and invisible characters
+  - [x] Hidden text in tag characters: remove, and report the hidden content in the step
+  - [x] Styled alphabets and fullwidth forms
+  - [x] HTML entities
+  - [x] URL percent-encoding
+  - [x] Backslash escapes (`\x41`, `\u0041`)
+- [x] **Encodings that need detection** (dev: 90% to 98% on whole text)
   - [x] Base64 (and URL-safe variant)
-  - [ ] Hex, binary, decimal character codes
-  - [x] ROT13
-  - [ ] Other Caesar shifts
-  - [ ] Reversed text
+  - [x] Hex, binary, decimal character codes
+  - [x] ROT13 and other Caesar shifts
+  - [x] Reversed text
+  - [ ] Shifted or reversed words inside clean text: Caesar 65%, rot13 68%, reversal 28%
+  - [ ] Reversed base64: 66%
 - [ ] **Ambiguous, high risk**
   - [ ] Homoglyphs: map built from the non-ASCII-to-ASCII subset of `confusables.txt`; per word,
         in mixed-script words or when the result is a known word

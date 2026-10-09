@@ -101,6 +101,35 @@ texts in the `symbols` category, which is why the tool does not normalise whole 
 
 The deobfuscator itself has no transforms yet and scores the same as "return the input".
 
+## Current results on the dev split (2026-10-09)
+
+The tool with the fourteen `conservative` transforms. The test split has not been run.
+
+| Scored at | Clean texts changed | Recovered exactly | Made worse |
+|---|---|---|---|
+| conservative | 0.01% (1/7442) | 95.5% (3461/3625) | 0.1% (2/3625) |
+| balanced | 0.03% (2/7442) | 43.0% (3482/8099) | 0.2% (19/8099) |
+| aggressive | 0.04% (3/7442) | 42.0% (3488/8309) | 0.7% (57/8309) |
+
+At `balanced` and `aggressive` the score is low because the six tricks those levels add have no
+transform yet; the real phishing set (0 of 3,000) and most of the hand-disguised set (4 of 25)
+depend on them.
+
+At `conservative`, by kind of sample: whole text 98.2%, part of a text 87.9%, two layers 94.8%,
+real text messages with HTML entities 100% (136/136). By length: under 20 characters 80.3%,
+20 and over 95% to 97%.
+
+Weak spots at `conservative`:
+
+- Shifted or reversed words inside otherwise clean text: Caesar 65%, rot13 68%, reversal 28%.
+  A shifted or reversed word that is also an English word as it stands cannot be told apart at
+  the edge of a span, and reversal also moves punctuation.
+- Reversed base64: 66%.
+- Texts under 20 characters: too little evidence to judge.
+- The one clean text changed is a sentence that mentions HTML entities ("write `&amp;` to show
+  an ampersand"). Real text messages contain bare entities far more often than text talks about
+  them, so entities are decoded.
+
 ## Known limits
 
 - **The committed obfuscated set is almost all synthetic.** It tests the tricks we thought of,

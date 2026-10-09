@@ -2,7 +2,7 @@
 
 Takes a text and returns the deobfuscated text, plus a record of which transforms were applied.
 
-**Status: early. The engine works, but only two tricks are undone so far: base64 and rot13, including when layered.**
+**Status: in development. Encodings, escapes, invisible characters and styled letters are undone, including when layered. Lookalike letters, leetspeak and spaced-out words are not handled yet.**
 
 ## What it will handle
 

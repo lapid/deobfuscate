@@ -436,6 +436,25 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
   document to update for which kind of change.
 - **Rule:** "Current status" is refreshed at the end of every piece of work.
 
+### 2026-10-09 — Phase 3, first two groups: fourteen conservative transforms (details by Claude)
+- **Result on dev, conservative:** 1 of 7,442 clean texts changed; 95.5% of obfuscated texts
+  recovered; 0.1% made worse. Details in `docs/evaluation.md`.
+- **Engine changes this forced:**
+  - **Certain transforms run first.** A Caesar shift was being applied to words still split by
+    invisible characters, then undone by a second shift, leaving junk in the step record.
+  - **Proposals are ranked by gain times letters,** not gain alone. A reversed part of a text was
+    beating the reversal of the whole text.
+  - **One-letter words are not evidence.** Hex written as `0x41 0x73` was "shifted" into a text
+    of the letters `a` and `i`, which scored as English.
+  - **Minimum score lowered** from 0.70 to 0.50 at conservative: correct decodes full of names
+    were being rejected. The gain requirement still guards clean text.
+  - **Caesar shifts and reversal need 10 letters at every level.**
+- **Guards chosen for the certain transforms:** see the table in `docs/architecture.md`.
+- **Accepted false change:** a sentence that mentions HTML entities gets them decoded. Real text
+  messages contain bare entities (136 in dev, all recovered) far more often than text discusses them.
+- **Rejected:** judging HTML entities and URL escapes with the scorer; decoding `&amp;` to `&`
+  does not change how English a text looks, so the scorer cannot decide it.
+
 ## Open questions
 
 None needing an answer from the user.
