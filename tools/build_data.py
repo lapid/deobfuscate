@@ -7,6 +7,7 @@ Writes into ``src/deobfuscate/data/``:
 - ``words.txt``: English word list from SCOWL.
 - ``ngrams.txt``: character four-gram counts from public-domain books.
 - ``scripts.txt``: which script each Unicode character belongs to.
+- ``lookalikes.txt``: non-ASCII letters that look like ASCII letters, from Unicode's confusables table.
 
 Sources are downloaded into ``data/cache/`` on first use. The books used here
 must never overlap with the evaluation corpus (``evaluation/sources.py``), or
@@ -26,6 +27,7 @@ OUT = ROOT / "src" / "deobfuscate" / "data"
 
 SCOWL_URL = "https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz"
 SCOWL_MAX_SIZE = 60
+SCOWL_ACCENTED_MAX_SIZE = 80
 SCOWL_FILE = re.compile(r"final/(english|american|british|british_z)-(words|upper|proper-names|contractions|abbreviations)\.(\d+)$")
 
 SCRIPTS_URL = "https://www.unicode.org/Public/UCD/latest/ucd/Scripts.txt"
@@ -52,10 +54,15 @@ def build_words() -> int:
     with tarfile.open(download(SCOWL_URL, "scowl/scowl.tar.gz")) as archive:
         for member in archive.getmembers():
             match = SCOWL_FILE.search(member.name)
-            if not match or int(match.group(3)) > SCOWL_MAX_SIZE:
+            if not match or int(match.group(3)) > SCOWL_ACCENTED_MAX_SIZE:
                 continue
+            rare = int(match.group(3)) > SCOWL_MAX_SIZE
             for line in io.TextIOWrapper(archive.extractfile(member), encoding="iso-8859-1"):
                 word = line.strip()
+                # Rarer lists contribute only accented spellings ("résumé"), so that a
+                # correctly accented word is known and is not mistaken for a disguise.
+                if rare and word.isascii():
+                    continue
                 # Possessives are handled when text is split into words.
                 if word and not word.endswith("'s"):
                     words.add(word)
@@ -101,12 +108,39 @@ def build_scripts() -> int:
     return len(merged)
 
 
+def build_lookalikes() -> int:
+    """Non-ASCII letters that Unicode lists as looking like ASCII letters.
+
+    Only this direction is safe to apply: the full table also maps ASCII to
+    ASCII ("m" to "rn", "1" to "l"). See docs/research/unicode-confusables.md.
+    """
+    import unicodedata
+
+    lines = []
+    for line in (ROOT / "data" / "reference" / "confusables.txt").read_text(encoding="utf-8-sig").splitlines():
+        fields = [field.strip() for field in line.split("#")[0].split(";")]
+        if len(fields) < 2 or not fields[0]:
+            continue
+        source = "".join(chr(int(code, 16)) for code in fields[0].split())
+        target = "".join(chr(int(code, 16)) for code in fields[1].split())
+        if len(source) != 1 or source.isascii() or not unicodedata.category(source).startswith("L"):
+            continue
+        # Styled and fullwidth letters fold to ASCII by themselves and have their own transform.
+        if unicodedata.normalize("NFKC", source).isascii():
+            continue
+        if target.isascii() and target.isalpha() and len(target) <= 2:
+            lines.append(f"{source}\t{target}")
+    (OUT / "lookalikes.txt").write_text("\n".join(sorted(lines)) + "\n", encoding="utf-8")
+    return len(lines)
+
+
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     print(f"words: {build_words()}")
     kept, total = build_ngrams()
     print(f"ngrams: {kept} kept, {total} counted")
     print(f"scripts: {build_scripts()} ranges")
+    print(f"lookalikes: {build_lookalikes()}")
 
 
 if __name__ == "__main__":

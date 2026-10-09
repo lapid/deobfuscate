@@ -30,3 +30,10 @@ def scripts() -> tuple[tuple[int, ...], tuple[int, ...], tuple[str, ...]]:
     """Parallel tuples of range starts, range ends and script names, sorted by start."""
     rows = [line.split(" ") for line in (DATA / "scripts.txt").read_text(encoding="utf-8").split("\n") if line]
     return (tuple(int(row[0], 16) for row in rows), tuple(int(row[1], 16) for row in rows), tuple(row[2] for row in rows))
+
+
+@cache
+def lookalikes() -> dict[str, str]:
+    """Non-ASCII letter -> the ASCII letters Unicode says it can be mistaken for."""
+    rows = [line.split("\t") for line in (DATA / "lookalikes.txt").read_text(encoding="utf-8").split("\n") if line]
+    return {source: target for source, target in rows}

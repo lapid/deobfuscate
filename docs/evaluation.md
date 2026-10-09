@@ -103,32 +103,39 @@ The deobfuscator itself has no transforms yet and scores the same as "return the
 
 ## Current results on the dev split (2026-10-09)
 
-The tool with the fourteen `conservative` transforms. The test split has not been run.
+Sixteen transforms: the fourteen `conservative` ones, plus lookalike letters and accent
+substitution. The test split has not been run.
 
-| Scored at | Clean texts changed | Recovered exactly | Made worse |
-|---|---|---|---|
-| conservative | 0.01% (1/7442) | 95.5% (3461/3625) | 0.1% (2/3625) |
-| balanced | 0.03% (2/7442) | 43.0% (3482/8099) | 0.2% (19/8099) |
-| aggressive | 0.04% (3/7442) | 42.0% (3488/8309) | 0.7% (57/8309) |
+| Scored at | Clean texts changed | Recovered exactly | Made worse | Real phishing set |
+|---|---|---|---|---|
+| conservative | 0.01% (1/7442) | 95.5% (3461/3625) | 0.1% (2/3625) | not at this level |
+| balanced | 0.01% (1/7442) | 68.1% (5519/8099) | 0.0% (4/8099) | 57.1% (1714/3000) |
+| aggressive | 0.12% (9/7442) | 78.0% (6479/8309) | 0.0% (3/8309) | 85.4% (2563/3000) |
 
-At `balanced` and `aggressive` the score is low because the six tricks those levels add have no
-transform yet; the real phishing set (0 of 3,000) and most of the hand-disguised set (4 of 25)
-depend on them.
+On the real phishing set the mean character error falls from 20.4% to 1.9% at `balanced` and to
+0.7% at `aggressive`: most sentences that are not recovered exactly are one or two letters off.
+
+`balanced` and `aggressive` are still held down by the four tricks with no transform yet
+(combining marks, leetspeak, separators, repeated characters). The hand-disguised set is at 4 of
+25 for the same reason.
 
 At `conservative`, by kind of sample: whole text 98.2%, part of a text 87.9%, two layers 94.8%,
 real text messages with HTML entities 100% (136/136). By length: under 20 characters 80.3%,
 20 and over 95% to 97%.
 
-Weak spots at `conservative`:
+Weak spots:
 
+- **Synthetic lookalikes and accents recover less than real ones** (whole text: homoglyph 63%,
+  accent substitution 40% at `balanced`). Our generator disguises a single short word such as
+  "a" or "I", or a name, far more often than real senders do, and those are exactly the cases
+  the rules refuse to touch without more evidence.
 - Shifted or reversed words inside otherwise clean text: Caesar 65%, rot13 68%, reversal 28%.
-  A shifted or reversed word that is also an English word as it stands cannot be told apart at
-  the edge of a span, and reversal also moves punctuation.
 - Reversed base64: 66%.
 - Texts under 20 characters: too little evidence to judge.
-- The one clean text changed is a sentence that mentions HTML entities ("write `&amp;` to show
-  an ampersand"). Real text messages contain bare entities far more often than text talks about
-  them, so entities are decoded.
+- The one clean text changed at `conservative` and `balanced` is a sentence that mentions HTML
+  entities ("write `&amp;` to show an ampersand").
+- The 8 extra clean texts changed at `aggressive` are correct foreign spellings read as
+  disguises (`coupé`, `françoise`, `crème`).
 
 ## Known limits
 

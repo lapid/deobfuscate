@@ -77,6 +77,14 @@ Each one changed the plan or the journal. Numbers are from the sources in the no
       fairer measure there.
     - Plain base64, URL escapes, reversal and dotted letters also appear, as the taxonomy expects.
 
+15. **For lookalikes, the table is the easy part and the decision is the hard part.** On the
+    dev half of the real phishing set, accent stripping covers 17% of substituted letters and
+    Unicode's table 63%; a short hand list of loose resemblances (`τ`, `η`, `κ` and others)
+    covers most of the rest. What limits recovery is deciding when a word may be touched:
+    a lone accented word (`õn`) or a lone Greek `α` for "a" looks exactly like correct foreign
+    spelling or a scientific symbol. Being strict about those gives 57% exact recovery with no
+    clean text harmed; being loose gives 85% and harms 8 clean texts in 7,442.
+
 ## Not done
 
 - No samples were produced with independent obfuscator tools; those are interactive web pages.

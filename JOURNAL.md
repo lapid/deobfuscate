@@ -455,6 +455,27 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Rejected:** judging HTML entities and URL escapes with the scorer; decoding `&amp;` to `&`
   does not change how English a text looks, so the scorer cannot decide it.
 
+### 2026-10-09 — Lookalike letters and accent substitution (order confirmed; design by Claude)
+- **Decision:** both are decided by the transform itself, one word at a time, not by the scorer.
+  A word is rewritten when it is not English as written and its plain-letter reading is, with
+  extra evidence required for the cases that look like correct foreign spelling. The rule table
+  is in `docs/architecture.md`.
+- **Why not the scorer:** it needs about 20 characters to be reliable; this is one word.
+- **Result on dev:** real phishing set 0% to 57.1% exact at `balanced` with 1 of 7,442 clean
+  texts changed (the same one as before); 85.4% at `aggressive` with 9 changed.
+- **Strict versus loose:** a lone word with everyday accents (`õn`, `coupé`) and a lone Greek
+  `α` for "a" cannot be told from correct spelling. `balanced` leaves them; `aggressive`
+  rewrites them when the surrounding text is clearly English.
+  - **Rejected:** rewriting them at `balanced`. It reached 70% on the phishing set and changed
+    14 clean texts, including `résumé`, `façade` and French and Swedish sentences.
+- **Word list:** accented spellings from SCOWL sizes 70 and 80 were added, so a correctly
+  accented word that SCOWL knows is not treated as a disguise. Few such entries exist.
+- **Loose resemblances:** a hand list of about 35 letters (`τ` for t, `η` for n) was written
+  from the substitutions seen in the dev half of the real phishing set. Only the letter pairs
+  were taken from that data, not its text.
+- **Presets:** `balanced` now uses the same thresholds as `conservative`; the looser values let
+  a Caesar shift rewrite a line of romanised Chinese.
+
 ## Open questions
 
 None needing an answer from the user.

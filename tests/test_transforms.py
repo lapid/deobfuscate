@@ -68,9 +68,49 @@ class RecoveryTest(unittest.TestCase):
             self.assertEqual(run(once).text, once, trick)
 
 
+class LookalikeTest(unittest.TestCase):
+    """Letters from other alphabets and added accents, decided word by word."""
+
+    CYRILLIC = str.maketrans("aeopc", "аеорс")
+    GREEK = str.maketrans("ntk", "ητκ")
+
+    def test_letters_from_other_alphabets(self):
+        sentence = "Please confirm your account password today"
+        for table in (self.CYRILLIC, self.GREEK):
+            result = run(sentence.translate(table), "balanced")
+            self.assertEqual(result.text, sentence)
+            self.assertEqual({step.transform for step in result.steps}, {"homoglyph"})
+
+    def test_odd_accents(self):
+        result = run("Please confirm y\u014d\u0169r acc\u014funt today", "balanced")
+        self.assertEqual(result.text, "Please confirm your account today")
+        self.assertEqual({step.transform for step in result.steps}, {"accent-substitution"})
+
+    def test_not_at_the_conservative_level(self):
+        text = "Please confirm your account".translate(self.CYRILLIC)
+        self.assertEqual(run(text).text, text)
+
+    def test_real_accents_and_other_languages_stay(self):
+        for level in ("balanced", "aggressive"):
+            for text in (
+                "Привет, как дела? Сегодня хорошая погода.",
+                "Η Ελλάδα είναι όμορφη το καλοκαίρι.",
+                "I visited Москва and Αθήνα last year.",
+                "Bonjour, comment ça va aujourd'hui ?",
+            ):
+                self.assertEqual(run(text, level).text, text, (level, text))
+        for text in ("naïve café résumé", "The Cyrillic letter а looks like the Latin a.", "Señor Núñez lives in São Paulo."):
+            self.assertEqual(run(text, "balanced").text, text)
+
+    def test_aggressive_level_reads_a_lone_accented_word(self):
+        text = "Dolores is survived by three children and her h\u00fcsband."
+        self.assertEqual(run(text, "balanced").text, text)
+        self.assertEqual(run(text, "aggressive").text, text.replace("\u00fc", "u"))
+
+
 class LeaveAloneTest(unittest.TestCase):
     def untouched(self, *texts: str) -> None:
-        for level in ("conservative", "balanced", "aggressive"):
+        for level in ("conservative", "balanced"):
             for text in texts:
                 result = run(text, level)
                 self.assertEqual((result.text, result.steps), (text, ()), (level, text))

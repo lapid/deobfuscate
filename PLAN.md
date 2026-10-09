@@ -155,10 +155,13 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
   - [ ] Shifted or reversed words inside clean text: Caesar 65%, rot13 68%, reversal 28%
   - [ ] Reversed base64: 66%
 - [ ] **Ambiguous, high risk**
-  - [ ] Homoglyphs: map built from the non-ASCII-to-ASCII subset of `confusables.txt`; per word,
-        in mixed-script words or when the result is a known word
+  - [x] Homoglyphs: map built from the non-ASCII-to-ASCII subset of `confusables.txt`, plus loose
+        resemblances and Unicode names; decided per word (`transforms/lookalike.py`)
+  - [x] Accent substitution: per word, with evidence rules so real accents stay
+  - [x] Looser variant of both at `aggressive`
+  - [ ] Lookalikes: digit `0` for `o` inside words, Armenian and Cherokee gaps, words whose plain
+        reading is not in the word list
   - [ ] Combining-mark overlays (strikethrough, stacked marks)
-  - [ ] Accent substitution: per word, only when removing the accent turns a non-word into a word
   - [ ] Leetspeak: only when the result is a known word; never on shorthand
   - [ ] Separator insertion (`s p a c e d`, `s.p.l.i.t`)
   - [ ] Repeated characters (`heeellooo`)

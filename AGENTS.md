@@ -14,18 +14,20 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 
 - **Done:** scope and decisions (Phase 0), research (Phase 0.5), evaluation harness (Phase 1),
   core engine and scorer (Phase 2), and two of three groups of Phase 3.
-- **Phase 3 so far:** the fourteen transforms that run at `conservative` exist: invisible
+- **Phase 3 so far:** sixteen transforms. The fourteen that run at `conservative` (invisible
   characters, hidden text, styled and fullwidth letters, HTML, URL and backslash escapes, base64,
-  hex, binary, decimal codes, rot13, Caesar shifts, reversal.
-- **Next:** the third group of Phase 3, the ambiguous visual tricks: `homoglyph`,
-  `accent-substitution`, `combining-marks`, `leetspeak`, `separator`, `repeated-chars`. These
-  decide on one word of evidence each, which the scorer has not been tested on. Then Phase 4
-  (tune the presets, error analysis, final run on test), Phase 5, Phase 6.
-- **Numbers on dev, `conservative`:** 1 of 7,442 clean texts changed; 95.5% of obfuscated texts
-  recovered; 0.1% made worse. The real phishing set (0 of 3,000) waits on the third group.
-- **Known problems:** shifted or reversed words inside clean text recover poorly (28% to 68%);
-  texts under 20 characters recover 80%; the presets have not had a tuning pass; no recogniser
-  yet for key-like tokens or code.
+  hex, binary, decimal codes, rot13, Caesar shifts, reversal), plus `homoglyph` and
+  `accent-substitution` at `balanced`, with a looser variant at `aggressive`.
+- **Next:** the rest of the third group: `combining-marks`, then `leetspeak`, `separator`,
+  `repeated-chars`. Then Phase 4 (tune the presets, error analysis, final run on test),
+  Phase 5, Phase 6.
+- **Numbers on dev:** clean texts changed 1, 1 and 9 of 7,442 at the three levels; recovery
+  95.5% at `conservative`; real phishing set 57.1% at `balanced` and 85.4% at `aggressive`.
+  Full table in `docs/evaluation.md`.
+- **Known problems:** a lone disguised word with everyday accents, or a lone Greek "a", is left
+  alone at `balanced`; digit `0` for `o` is not handled; shifted or reversed words inside clean
+  text recover poorly; the presets have not had a tuning pass; no recogniser yet for key-like
+  tokens or code.
 - **Waiting on the owner:** checking the test half of `data/human/to_disguise.txt` for answers
   typed under the wrong sentence.
 - **Deferred to version 2:** see "Version 2" in `PLAN.md` (evaluation gaps, public demo site).

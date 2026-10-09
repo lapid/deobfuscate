@@ -38,8 +38,8 @@ class Policy:
 # Starting values; tuned on the dev split in Phase 4.
 POLICIES = {
     "conservative": Policy(min_score=0.50, min_gain=0.30, min_letters=10),
-    "balanced": Policy(min_score=0.45, min_gain=0.25, min_letters=6),
-    "aggressive": Policy(min_score=0.40, min_gain=0.15, min_letters=4),
+    "balanced": Policy(min_score=0.50, min_gain=0.30, min_letters=10),
+    "aggressive": Policy(min_score=0.45, min_gain=0.25, min_letters=6),
 }
 
 
