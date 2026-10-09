@@ -3,26 +3,80 @@
 Python library and CLI that takes a text and returns the deobfuscated text plus a record of the
 transforms applied. This file is the current state. The reasons are in `JOURNAL.md`.
 
-## Where things are
+## Start here
 
-- `JOURNAL.md`: every decision with its reason, in order. Open questions are at the bottom.
-- `PLAN.md`: phased plan with checkboxes. Tick items as they are completed.
-- `docs/research/README.md`: research conclusions and index of notes. Read before designing a transform.
-- `docs/taxonomy.md`: every obfuscation type, its strictness level, and what is out of scope.
-- `docs/architecture.md`: how the engine works and how to add a transform. `docs/scorer.md`: the plausibility scorer.
-- `tools/build_data.py`: rebuilds the data files shipped in `src/deobfuscate/data/` (word list, four-gram table, script table).
-- `docs/evaluation.md`: how the tool is measured, the commands, and the baseline numbers.
-- `src/deobfuscate/`: the package. `evaluation/`: the test-set generator, metrics and runner. `tests/`: unit tests.
+1. Read this file to the end. It is the current state of the project and its rules.
+2. Read "Current status" below, then the unticked items of the current phase in `PLAN.md`.
+3. Read the document for the area you will touch (table below) before changing anything.
+4. Open `JOURNAL.md` only when you need the reason behind a decision; search it by keyword.
+
+## Current status (updated 2026-10-08)
+
+- **Done:** scope and decisions (Phase 0), research (Phase 0.5), evaluation harness (Phase 1),
+  core engine and scorer (Phase 2).
+- **Working now:** nothing in progress. Two transforms exist as proof: `base64` and `rot13`.
+- **Next:** Phase 3, the remaining transforms, safest first. Then Phase 4 (tune the presets,
+  error analysis, final run on test), Phase 5 (packaging), Phase 6 (publishing).
+- **Numbers on dev, `conservative`:** 0 of 7,442 clean texts changed; 18% of obfuscated texts
+  recovered, because 19 of 21 tricks have no transform yet.
+- **Known problems:** `balanced` and `aggressive` presets let rot13 change a few clean texts;
+  rot13 on part of a text recovers only 65%; no recogniser yet for key-like tokens or code.
+- **Waiting on the owner:** checking the test half of `data/human/to_disguise.txt` for answers
+  typed under the wrong sentence.
+- **Deferred to version 2:** see "Version 2" in `PLAN.md` (evaluation gaps, public demo site).
+
+## How we work with the owner
+
+- The owner decides goals and anything about scope, licences, publishing and risk. Ask, with a
+  recommendation, and keep going on whatever does not depend on the answer.
+- The owner starts each phase. Do not begin the next phase unasked.
+- Decisions made by the agent alone are allowed for technical detail, and are logged as
+  "decided by Claude" so the owner can overrule them.
+- Report results plainly, including what failed, what was not checked, and what is assumed.
+- The agent may commit and push to `master` for work the owner asked for.
+
+## Documents
+
+Each document has one job. Update it in the same commit as the change it describes.
+
+| Document | What it is for | Update it when |
+|---|---|---|
+| `AGENTS.md` (this file; `CLAUDE.md` imports it) | Current state: status, rules, settled constraints, map of the repo | Status changes, a constraint is settled or changed, a document or folder is added |
+| `JOURNAL.md` | The log of every decision, in order, with why, what was rejected, and who decided. Open questions at the bottom | A decision is made, changed or confirmed. Never delete an entry; mark it superseded |
+| `PLAN.md` | The phased to-do list with checkboxes, including "Version 2" | An item is finished (tick it) or new work is discovered (add it) |
+| `README.md` | The public front page: what the tool does and its honest status | The status or the user-facing behaviour changes |
+| `docs/taxonomy.md` | Every trick: example, strictness level, main guard; and what is out of scope | A trick is added, moved between levels, or ruled out |
+| `docs/architecture.md` | How the engine works and how to add a transform | The engine, limits, presets or transform interface change |
+| `docs/scorer.md` | The plausibility scorer and the experiment behind it | The scorer or its data changes, or a new experiment is run |
+| `docs/evaluation.md` | The evaluation sets, the measures, the commands, baseline numbers, known limits | The sets, metrics or baselines change |
+| `docs/research/README.md` | Numbered conclusions from research and from real data; index of the notes | Something is learned that changes the design |
+| `docs/research/*.md` | One note per topic, with sources and what was and was not verified | A source is read or checked |
+| `data/eval/README.md` | Sources, licences and credits of the evaluation sets | A source is added or the sets are rebuilt differently |
+| `data/samples/README.md`, `data/human/README.md`, `data/reference/README.md`, `src/deobfuscate/data/NOTICE.md` | What each data folder holds and under which licence | Files there change |
+
+## Code and data
+
+- `src/deobfuscate/`: the package. `engine.py` judges, `transforms/` propose, `scorer.py` scores,
+  `protect.py` and `scripts.py` support, `data/` holds the word list, four-gram table and script table.
+- `evaluation/`: test-set generator (`obfuscator.py`, `negatives.py`), corpus builders
+  (`sources.py`, `corpus.py`, `build.py`, `local_sets.py`, `human.py`), `metrics.py`, `run.py`.
+  Not part of the installed package.
+- `tests/`: unit tests, standard-library `unittest`.
+- `tools/build_data.py`: rebuilds the data files shipped in `src/deobfuscate/data/`.
 - `data/eval/`: evaluation sets, dev and test, with per-row licences (not MIT). Do not edit by hand.
 - `data/local/`: git-ignored real-world set (BitCore) built by `uv run python -m evaluation.local_sets`. Never commit it.
 - `data/human/`: sentences disguised by hand by the owner. Do not read the answers in the sheet; half are test data.
-- `data/samples/`: small hand-made seed samples as JSONL; format and licences in its README.
+- `data/samples/`: small hand-made seed samples for debugging.
 - `data/reference/`: third-party data files, unmodified, with their own licences.
+- `data/cache/`: git-ignored downloads.
 
 ## Settled constraints
 
 - **Scope:** encodings (base64, hex, rot13, URL and HTML escapes) and visual tricks (homoglyphs,
-  leetspeak, invisible characters, inserted separators). Code obfuscation is out.
+  accent substitution, leetspeak, invisible characters, inserted separators). The full list is
+  `docs/taxonomy.md`. Code obfuscation is out.
+- **No spelling correction** in v1: misspellings, dropped letters, shorthand and emoji standing
+  for a word are left as written.
 - **Both causes:** accidental mess and deliberate evasion. The tool never claims completeness.
 - **English only.** Other languages and scripts pass through unchanged.
 - **Worst mistake is changing clean text.** A transform is applied only when a plausibility score
@@ -32,7 +86,8 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 - **Dependencies:** n-gram and word-list resources are allowed. No other deobfuscation tool or
   library may be imported; all detection and decoding logic is ours. Standard-library codecs are fine.
 - **Python 3.14 or newer.**
-- **MIT licence.** Every dependency and committed data file must be MIT-compatible.
+- **MIT licence** for our code and our own data. Third-party data may be committed under its own
+  licence if that licence allows redistribution.
 - **Public project:** `github.com/lapid/deobfuscate` and PyPI package `deobfuscate`, branch
   `master`, version 0.x. Everything committed must be safe to publish.
 - **Owners:** Lapid Harel and the LLM coding agent. Lapid is the sole human maintainer.
@@ -56,6 +111,8 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
   public-domain text. Not `wordfreq`, not Norvig's files (licences).
 - **Third-party data keeps its own licence** and credit; MIT covers our own work. CC BY and
   CC BY-SA data may be committed, with source, address and licence on every row.
+- **Real-world data without a licence** (BitCore) is used locally only and never committed.
+- **Limits:** inputs over 100,000 characters are returned unchanged; layers are followed 4 deep.
 - **Provisional v1 targets:** at most 1% of clean texts changed; 90% exact recovery for lossless
   transforms and encodings; 70% for ambiguous visual tricks.
 - **Evaluation before implementation.** Test sets and metrics come first.
@@ -65,13 +122,17 @@ Proposals not yet confirmed by the user are marked as such in `JOURNAL.md`. Do n
 ## Commands
 
 - Tests: `uv run python -m unittest discover -s tests`
-- Evaluation: `uv run python -m evaluation.run` (add `--detail` for per-category tables)
+- Evaluation: `uv run python -m evaluation.run` (add `--detail` for per-category tables,
+  `--level conservative` for one level, `--system identity` or `nfkc` for a baseline)
+- Real-world set, once per machine: `uv run python -m evaluation.local_sets`
+- Try it: `uv run deobfuscate --json "some text"`
 
 ## Working rules
 
 - Record every decision or change of decision in `JOURNAL.md`, with the reason, and mark
   proposals the user has not confirmed. Mark superseded entries rather than deleting them.
-- Update this file in the same change whenever a settled constraint changes.
+- Update this file in the same change whenever a settled constraint changes, and refresh
+  "Current status" at the end of every piece of work.
 - Tick `PLAN.md` items when done; add new items rather than working off-plan.
 - Run the evaluation after adding or changing a transform. Keep the change only if the clean set
   stays clean.

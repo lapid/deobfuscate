@@ -3,6 +3,11 @@
 Running log of goals and decisions for the text deobfuscator. Newest entries at the bottom.
 Each decision records what we chose, why, and what we rejected.
 
+This file is history, and it is long. The current state of every settled decision is
+summarised in `AGENTS.md`; come here for the reasoning. Entries marked "superseded" no longer hold.
+Each heading says who decided: "confirmed" means the owner agreed, "decided by Claude" means the
+agent chose and the owner may overrule, "proposed" means not yet agreed.
+
 ## Goal
 
 A Python script that takes a text and returns a text, attempting to undo obfuscation.
@@ -423,6 +428,13 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Decision:** the tool reports both alphabets as `base64`; the evaluation treats the two
   labels as one when scoring the step record.
 - **Why:** many URL-safe strings contain neither `-` nor `_` and cannot be told apart.
+
+### 2026-10-09 — `AGENTS.md` is the entry point and carries the status (confirmed need; layout by Claude)
+- **Decision:** `AGENTS.md` now opens with reading order, current status, how we work with the
+  owner, and a table saying what each document is for and when to update it.
+- **Why:** a new agent session had the rules but no recap of where the project stands or which
+  document to update for which kind of change.
+- **Rule:** "Current status" is refreshed at the end of every piece of work.
 
 ## Open questions
 
