@@ -7,6 +7,7 @@ from deobfuscate.transforms.caesar import Caesar
 from deobfuscate.transforms.escapes import BackslashEscape, HtmlEntity, UrlPercent
 from deobfuscate.transforms.invisible import TagCharacters, ZeroWidth
 from deobfuscate.transforms.lookalike import Lookalike
+from deobfuscate.transforms.marks import CombiningMarks
 from deobfuscate.transforms.reverse import Reverse
 from deobfuscate.transforms.styled import Fullwidth, StyledAlphabet
 
@@ -18,6 +19,7 @@ ALL: tuple[Transform, ...] = (
     HtmlEntity(),
     UrlPercent(),
     BackslashEscape(),
+    CombiningMarks(),
     Lookalike("homoglyph"),
     Lookalike("accent-substitution"),
     Lookalike("homoglyph", level="aggressive", loose=True),

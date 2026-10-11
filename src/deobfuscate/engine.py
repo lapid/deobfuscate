@@ -70,28 +70,36 @@ class Engine:
             return text, ()
         steps: list[Step] = []
         for _ in range(MAX_STEPS):
-            best = self.best_proposal(text, depth)
-            if best is None:
+            accepted = self.best_proposals(text, depth)
+            if not accepted:
                 break
-            candidate = best.candidate
-            steps.append(Step(best.transform.name, candidate.start, candidate.end, text[candidate.start : candidate.end],
-                              candidate.replacement, round(best.confidence, 3), candidate.hidden))
-            # Inner steps were found on the replacement alone; move them to where it now sits.
-            steps.extend(Step(s.transform, s.start + candidate.start, s.end + candidate.start, s.before, s.after,
-                              s.confidence, s.hidden) for s in best.inner_steps)
-            text = text[: candidate.start] + best.final + text[candidate.end :]
+            # Applied left to right; ``moved`` is how far earlier ones have shifted the rest.
+            moved = 0
+            for best in accepted:
+                candidate = best.candidate
+                start, end = candidate.start + moved, candidate.end + moved
+                steps.append(Step(best.transform.name, start, end, text[start:end], candidate.replacement,
+                                  round(best.confidence, 3), candidate.hidden))
+                # Inner steps were found on the replacement alone; move them to where it now sits.
+                steps.extend(Step(s.transform, s.start + start, s.end + start, s.before, s.after, s.confidence, s.hidden)
+                             for s in best.inner_steps)
+                text = text[:start] + best.final + text[end:]
+                moved += len(best.final) - (end - start)
         return text, tuple(steps)
 
-    def best_proposal(self, text: str, depth: int) -> Accepted | None:
+    def best_proposals(self, text: str, depth: int) -> list[Accepted]:
+        """The proposals to apply next, in text order; empty when nothing is left to do."""
         protected = protected_spans(text)
         # Certain transforms go first, until none applies. Judged transforms then
         # see text free of invisible characters and escapes, which would otherwise
         # break words apart and mislead them.
         for judged in (False, True):
             best: Accepted | None = None
+            together: list[Accepted] = []
             for transform in self.transforms:
                 if transform.judged != judged:
                     continue
+                verdicts = []
                 for candidate in transform.propose(text):
                     before = text[candidate.start : candidate.end]
                     if candidate.replacement == before:
@@ -99,11 +107,25 @@ class Engine:
                     if not transform.ignores_protection and overlaps(candidate.start, candidate.end, protected):
                         continue
                     verdict = self.judge(transform, candidate, before, depth)
-                    if verdict is not None and (best is None or verdict.weight > best.weight):
-                        best = verdict
-            if best is not None:
-                return best
-        return None
+                    if verdict is not None:
+                        verdicts.append(verdict)
+                top = max(verdicts, key=lambda verdict: verdict.weight, default=None)
+                if top is not None and (best is None or top.weight > best.weight):
+                    best, together = top, verdicts
+            if best is None:
+                continue
+            if judged:
+                return [best]
+            # A certain transform decided on the text as a whole, so everything it
+            # proposed is applied at once. One at a time, the words applied first
+            # would no longer be there as evidence for the rest.
+            chosen: list[Accepted] = []
+            for verdict in sorted(together, key=lambda verdict: (-verdict.weight, verdict.candidate.start)):
+                if not any(verdict.candidate.start < other.candidate.end and other.candidate.start < verdict.candidate.end
+                           for other in chosen):
+                    chosen.append(verdict)
+            return sorted(chosen, key=lambda verdict: verdict.candidate.start)
+        return []
 
     def judge(self, transform: Transform, candidate: Candidate, before: str, depth: int) -> Accepted | None:
         key = (transform.name, before, candidate.replacement)

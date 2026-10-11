@@ -135,6 +135,23 @@ class EngineTest(unittest.TestCase):
         self.assertEqual(Engine("conservative", (Shout(),)).run("hi")[0], "hi")
         self.assertEqual(Engine("balanced", (Shout(),)).run("hi")[0], "hi!")
 
+    def test_a_certain_transform_applies_all_its_proposals_together(self):
+        class Pairs(Transform):
+            name = "reverse"
+            judged = False
+
+            def propose(self, text):
+                # Proposes only while the text still holds two marks, as a transform that needs evidence does.
+                spots = [index for index, char in enumerate(text) if char == "*"]
+                if len(spots) >= 2:
+                    for index in spots:
+                        yield Candidate(index, index + 1, "--")
+
+        text, steps = Engine("conservative", (Pairs(),)).run("a*b*c")
+        self.assertEqual(text, "a--b--c")
+        # Each step's span is in the text as it stood before that step.
+        self.assertEqual([(step.start, step.end) for step in steps], [(1, 2), (4, 5)])
+
     def test_protected_spans_are_skipped(self):
         class Upper(Transform):
             name = "reverse"

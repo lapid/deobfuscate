@@ -108,6 +108,35 @@ class LookalikeTest(unittest.TestCase):
         self.assertEqual(run(text, "aggressive").text, text.replace("\u00fc", "u"))
 
 
+class CombiningMarksTest(unittest.TestCase):
+    def test_overlays_and_stacks(self):
+        for seed in range(8):
+            for sentence in SENTENCES:
+                disguised = obfuscator.apply("combining-marks", sentence, random.Random(seed))
+                if disguised == sentence:
+                    continue
+                result = run(disguised, "balanced")
+                self.assertEqual(result.text, sentence, disguised)
+                self.assertEqual({step.transform for step in result.steps}, {"combining-marks"})
+                self.assertEqual(run(disguised).text, disguised)
+
+    def test_a_one_letter_word_follows_the_rest(self):
+        strike = "\u0336"
+        text = f"I{strike} sent t{strike}h{strike}e{strike} report"
+        self.assertEqual(run(text, "balanced").text, "I sent the report")
+        alone = f"I{strike} sent the report"
+        self.assertEqual(run(alone, "balanced").text, alone)
+
+    def test_spelling_and_phonetic_marks_stay(self):
+        for text in (
+            "A cafe\u0301 on the corner, nai\u0308ve as ever.",
+            "The village of Z\u0304ara\u0304t is written t\u0361s in the notes.",
+            "Tie\u0302\u0301ng Vie\u0323\u0302t is the Vietnamese language.",
+        ):
+            for level in ("balanced", "aggressive"):
+                self.assertEqual(run(text, level).text, text, (level, text))
+
+
 class LeaveAloneTest(unittest.TestCase):
     def untouched(self, *texts: str) -> None:
         for level in ("conservative", "balanced"):

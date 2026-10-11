@@ -476,6 +476,31 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Presets:** `balanced` now uses the same thresholds as `conservative`; the looser values let
   a Caesar shift rewrite a line of romanised Chinese.
 
+### 2026-10-11 — Combining marks, and applying a transform's proposals together (decided by Claude)
+- **Combining marks:** decided by the transform, word by word, like the lookalikes. Marks are
+  removed from a word when a letter carries three or more, when two or more letters carry a mark
+  no alphabet spells with and the plain word is English, or when every letter of a word of three
+  or more letters carries one. Other marked words (one-letter words, names) follow only if some
+  word in the text qualified.
+  - **Why not "strip every mark":** decomposed accents (`e` plus an acute), Vietnamese (two
+    marks on a letter) and phonetic notation are ordinary text. The clean set contains all three.
+  - **Rejected:** treating any known word with one odd mark as disguised. A unit test showed it
+    removed the tie from phonetic `t͡s`, because "ts" is in the word list.
+- **Engine change:** all proposals of one certain (`judged = False`) transform are applied in
+  the same round, instead of the single largest.
+  - **Why:** lookalike and combining-mark rules count evidence over the whole text. Applied one
+    word at a time, the strong words were rewritten first and the weak ones (a lone "a", a name)
+    then had no evidence left. This was a bug in the 2026-10-09 result, which Claude had wrongly
+    put down to the generator disguising short words too often.
+  - **Effect on dev at `balanced`:** real phishing set 57.1% to 81.0%; synthetic homoglyph 63%
+    to 93%; accent substitution 40% to 74%. Clean texts changed: still 1 of 7,442.
+  - Step offsets are unchanged in meaning: each is the span in the text as it stood before
+    that step.
+- **Result on dev:** combining marks 96.7% whole text, 98.3% inside clean text. Clean texts
+  changed 1, 1 and 9 of 7,442 at the three levels, as before.
+- **Correction:** the strictness table in `docs/architecture.md` showed the old thresholds; it
+  now matches the code.
+
 ## Open questions
 
 None needing an answer from the user.

@@ -101,23 +101,29 @@ texts in the `symbols` category, which is why the tool does not normalise whole 
 
 The deobfuscator itself has no transforms yet and scores the same as "return the input".
 
-## Current results on the dev split (2026-10-09)
+## Current results on the dev split (2026-10-11)
 
-Sixteen transforms: the fourteen `conservative` ones, plus lookalike letters and accent
-substitution. The test split has not been run.
+Seventeen transforms: the fourteen `conservative` ones, plus lookalike letters, accent
+substitution and combining marks. The test split has not been run.
 
 | Scored at | Clean texts changed | Recovered exactly | Made worse | Real phishing set |
 |---|---|---|---|---|
 | conservative | 0.01% (1/7442) | 95.5% (3461/3625) | 0.1% (2/3625) | not at this level |
-| balanced | 0.01% (1/7442) | 68.1% (5519/8099) | 0.0% (4/8099) | 57.1% (1714/3000) |
-| aggressive | 0.12% (9/7442) | 78.0% (6479/8309) | 0.0% (3/8309) | 85.4% (2563/3000) |
+| balanced | 0.01% (1/7442) | 81.2% (6573/8099) | 0.0% (3/8099) | 81.0% (2431/3000) |
+| aggressive | 0.12% (9/7442) | 82.5% (6852/8309) | 0.0% (2/8309) | 89.4% (2682/3000) |
 
-On the real phishing set the mean character error falls from 20.4% to 1.9% at `balanced` and to
-0.7% at `aggressive`: most sentences that are not recovered exactly are one or two letters off.
+On the real phishing set the mean character error falls from 20.4% to 1.5% at `balanced` and to
+0.6% at `aggressive`: most sentences that are not recovered exactly are one or two letters off.
 
-`balanced` and `aggressive` are still held down by the four tricks with no transform yet
-(combining marks, leetspeak, separators, repeated characters). The hand-disguised set is at 4 of
-25 for the same reason.
+At `balanced`, whole text: homoglyph 93.3%, accent substitution 73.8%, combining marks 96.7%.
+
+`balanced` and `aggressive` are still held down by the three tricks with no transform yet
+(leetspeak, separators, repeated characters). The hand-disguised set is at 5 of 25 for the same
+reason.
+
+Most of the rise since 2026-10-09 (phishing set 57.1% to 81.0% at `balanced`) came from one
+engine change, not from a new rule: all proposals of a certain transform are now applied in one
+round. Before, the words rewritten first were no longer there as evidence for the rest.
 
 At `conservative`, by kind of sample: whole text 98.2%, part of a text 87.9%, two layers 94.8%,
 real text messages with HTML entities 100% (136/136). By length: under 20 characters 80.3%,
@@ -125,10 +131,8 @@ real text messages with HTML entities 100% (136/136). By length: under 20 charac
 
 Weak spots:
 
-- **Synthetic lookalikes and accents recover less than real ones** (whole text: homoglyph 63%,
-  accent substitution 40% at `balanced`). Our generator disguises a single short word such as
-  "a" or "I", or a name, far more often than real senders do, and those are exactly the cases
-  the rules refuse to touch without more evidence.
+- **Accent substitution inside otherwise clean text: 62%** at `balanced` (whole text 74%). A
+  single word with everyday accents, or a name, is left alone without more evidence.
 - Shifted or reversed words inside otherwise clean text: Caesar 65%, rot13 68%, reversal 28%.
 - Reversed base64: 66%.
 - Texts under 20 characters: too little evidence to judge.

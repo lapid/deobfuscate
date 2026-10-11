@@ -10,19 +10,19 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 3. Read the document for the area you will touch (table below) before changing anything.
 4. Open `JOURNAL.md` only when you need the reason behind a decision; search it by keyword.
 
-## Current status (updated 2026-10-09)
+## Current status (updated 2026-10-11)
 
 - **Done:** scope and decisions (Phase 0), research (Phase 0.5), evaluation harness (Phase 1),
   core engine and scorer (Phase 2), and two of three groups of Phase 3.
-- **Phase 3 so far:** sixteen transforms. The fourteen that run at `conservative` (invisible
+- **Phase 3 so far:** seventeen transforms. The fourteen that run at `conservative` (invisible
   characters, hidden text, styled and fullwidth letters, HTML, URL and backslash escapes, base64,
-  hex, binary, decimal codes, rot13, Caesar shifts, reversal), plus `homoglyph` and
-  `accent-substitution` at `balanced`, with a looser variant at `aggressive`.
-- **Next:** the rest of the third group: `combining-marks`, then `leetspeak`, `separator`,
-  `repeated-chars`. Then Phase 4 (tune the presets, error analysis, final run on test),
+  hex, binary, decimal codes, rot13, Caesar shifts, reversal), plus `homoglyph`,
+  `accent-substitution` and `combining-marks` at `balanced`, with a looser lookalike variant at
+  `aggressive`.
+- **Next:** the rest of the third group: `leetspeak`, then `separator`, `repeated-chars`. Then Phase 4 (tune the presets, error analysis, final run on test),
   Phase 5, Phase 6.
 - **Numbers on dev:** clean texts changed 1, 1 and 9 of 7,442 at the three levels; recovery
-  95.5% at `conservative`; real phishing set 57.1% at `balanced` and 85.4% at `aggressive`.
+  95.5% at `conservative`; real phishing set 81.0% at `balanced` and 89.4% at `aggressive`.
   Full table in `docs/evaluation.md`.
 - **Known problems:** a lone disguised word with everyday accents, or a lone Greek "a", is left
   alone at `balanced`; digit `0` for `o` is not handled; shifted or reversed words inside clean

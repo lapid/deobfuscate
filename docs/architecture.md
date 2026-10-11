@@ -21,9 +21,12 @@ How the deobfuscator works inside. Read this before adding or changing a transfo
    `start` to `end` with this".
 2. A candidate that overlaps a protected span is dropped, unless its transform opts out.
 3. **Certain transforms go first.** Transforms marked `judged = False` (invisible characters,
-   styled letters, escapes) are applied until none has anything left to propose. Only then are
-   the judged transforms asked. Otherwise an invisible character inside a word would split it
-   and mislead the transforms that read words.
+   styled letters, escapes, lookalikes, combining marks) are applied until none has anything
+   left to propose. Only then are the judged transforms asked. Otherwise an invisible character
+   inside a word would split it and mislead the transforms that read words.
+   **All proposals of one certain transform are applied in the same round.** Some of them decide
+   on evidence from the whole text; applied one at a time, the words rewritten first would no
+   longer be there as evidence for the rest.
 4. For a judged candidate, the engine deobfuscates the replacement **itself**, by running the
    whole process on it one layer deeper. This is what handles layers: base64 inside base64, or
    base64 inside rot13. The candidate is judged by what it finally turns into.
@@ -46,8 +49,8 @@ picks a `Policy` in `engine.py`:
 | Level | Minimum score | Minimum gain | Minimum letters |
 |---|---|---|---|
 | conservative | 0.50 | 0.30 | 10 |
-| balanced | 0.45 | 0.25 | 6 |
-| aggressive | 0.40 | 0.15 | 4 |
+| balanced | 0.50 | 0.30 | 10 |
+| aggressive | 0.45 | 0.25 | 6 |
 
 A transform can ask for more letters than the level does (`min_letters`); Caesar shifts and
 reversal require 10 at every level, because a short unknown word can become an English word
@@ -67,6 +70,7 @@ The values were set while building the transforms and still need a proper tuning
 | `url-percent` | `escapes.py` | no | Needs two escapes in a word, or one joined to a letter |
 | `backslash-escape` | `escapes.py` | no | Needs three escapes in a row |
 | `homoglyph`, `accent-substitution` | `lookalike.py` | no | Balanced and up. Decided word by word; rules below |
+| `combining-marks` | `marks.py` | no | Balanced and up. Decided word by word; rules below |
 | `base64` | `base64.py` | yes | Both alphabets; reported as `base64` |
 | `hex`, `binary`, `decimal-codes` | `bytes.py` | yes | Must decode to readable UTF-8 |
 | `rot13`, `caesar` | `caesar.py` | yes | Whole text, or runs of words that are not English as they stand |
@@ -125,8 +129,23 @@ a lone "a" or "I", if 70% of the plain words are English. That is the main diffe
 the two levels today: on the real phishing set it lifts recovery from 57% to 85%, and it costs
 8 more clean texts out of 7,442 (correct foreign spellings such as `coupé`).
 
-## State on 2026-10-09
+## Combining marks
 
-Sixteen transforms exist: the fourteen at `conservative`, plus `homoglyph` and
-`accent-substitution`. Not built yet: `combining-marks`, `leetspeak`, `separator`,
+`marks.py` removes marks laid over letters (strike-through, underline, stacked marks). An accent
+typed as a separate mark is ordinary spelling, and phonetic notation uses rarer marks (`t͡s`),
+so marks are removed only from a word that shows the trick:
+
+- a letter carries three or more marks; or
+- two or more letters carry a mark no alphabet spells with (one that Unicode never composes
+  into a letter), and the word without marks is a known English word; or
+- every letter of a word of three or more letters carries such a mark.
+
+A word with such a mark that meets none of these (a one-letter word, a name, one marked letter)
+is stripped only when another word in the text qualified. Marks of other scripts (Thai,
+Devanagari) and emoji variation selectors are never touched.
+
+## State on 2026-10-11
+
+Seventeen transforms exist: the fourteen at `conservative`, plus `homoglyph`,
+`accent-substitution` and `combining-marks`. Not built yet: `leetspeak`, `separator`,
 `repeated-chars`.
