@@ -163,7 +163,9 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
         reading is not in the word list
   - [x] Combining-mark overlays (strikethrough, stacked marks) (`transforms/marks.py`; dev 97% whole text)
   - [x] Engine: apply all proposals of a certain transform in one round, so evidence is not lost
-  - [ ] Leetspeak: only when the result is a known word; never on shorthand
+  - [x] Leetspeak: only when the result is a known word; never on shorthand (`transforms/leet.py`;
+        dev 76% whole text, 87% inside clean text)
+  - [ ] Leetspeak gaps: capitals hidden behind a digit, names, layered with homoglyphs (60%)
   - [ ] Separator insertion (`s p a c e d`, `s.p.l.i.t`)
   - [ ] Repeated characters (`heeellooo`)
 

@@ -501,6 +501,26 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Correction:** the strictness table in `docs/architecture.md` showed the old thresholds; it
   now matches the code.
 
+### 2026-10-12 — Leetspeak (decided by Claude)
+- **Decision:** decided by the transform, token by token. A token is rewritten only when every
+  digit and symbol in it reads as a letter and the result is a known word. The rule table is in
+  `docs/architecture.md`.
+- **Characters read:** `0 1 3 4 5 7 @ $ !`. Not `8` or `2`: they stand for a sound (`l8r`,
+  `2day`), which the settled constraints call shorthand. Leaving them out keeps the whole
+  shorthand family untouched without a list of exceptions.
+- **Shapes that need evidence or are never touched:** found from the clean dev set, which holds
+  `test5`-like identifiers, `8am`, `1st`, `$5m`, `G5`, `M14`, `b4`, handles and `print$`.
+  - **Tried and pulled back:** letting one rewritten token be enough evidence for any short
+    token. It changed 3 more clean texts (`b4` to "ba", `G5` to "Gs", `M14` to "Mia"). One or
+    two letters followed by a number are now never read; with that guard, one token of evidence
+    is enough for the other short shapes and the clean set is back to 1 of 7,442.
+- **Lookalike letters joined to digits:** `lookalike.py` now asks `leet.py` whether the whole
+  token is a known word once both are read. Layered homoglyph and leetspeak: 32% to 60%.
+- **Result on dev at `balanced`:** leetspeak 76.0% whole text, 86.7% inside clean text; all
+  obfuscated samples 81.2% to 85.4%; clean texts changed still 1, 1 and 9 of 7,442.
+- **Known limit:** a capital hidden behind a digit is not recoverable except at the start of a
+  sentence or for a word known only as a name.
+
 ## Open questions
 
 None needing an answer from the user.

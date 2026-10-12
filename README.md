@@ -2,7 +2,7 @@
 
 Takes a text and returns the deobfuscated text, plus a record of which transforms were applied.
 
-**Status: in development. Encodings, escapes, invisible characters and styled letters are undone, including when layered. Lookalike letters, added accents and overlaid marks are undone at the `balanced` level. Leetspeak and spaced-out words are not handled yet.**
+**Status: in development. Encodings, escapes, invisible characters and styled letters are undone, including when layered. Lookalike letters, added accents, overlaid marks and leetspeak are undone at the `balanced` level. Spaced-out words are not handled yet.**
 
 ## What it will handle
 

@@ -6,6 +6,7 @@ from deobfuscate.transforms.bytes import Binary, DecimalCodes, Hex
 from deobfuscate.transforms.caesar import Caesar
 from deobfuscate.transforms.escapes import BackslashEscape, HtmlEntity, UrlPercent
 from deobfuscate.transforms.invisible import TagCharacters, ZeroWidth
+from deobfuscate.transforms.leet import Leetspeak
 from deobfuscate.transforms.lookalike import Lookalike
 from deobfuscate.transforms.marks import CombiningMarks
 from deobfuscate.transforms.reverse import Reverse
@@ -20,6 +21,7 @@ ALL: tuple[Transform, ...] = (
     UrlPercent(),
     BackslashEscape(),
     CombiningMarks(),
+    Leetspeak(),
     Lookalike("homoglyph"),
     Lookalike("accent-substitution"),
     Lookalike("homoglyph", level="aggressive", loose=True),

@@ -101,25 +101,25 @@ texts in the `symbols` category, which is why the tool does not normalise whole 
 
 The deobfuscator itself has no transforms yet and scores the same as "return the input".
 
-## Current results on the dev split (2026-10-11)
+## Current results on the dev split (2026-10-12)
 
-Seventeen transforms: the fourteen `conservative` ones, plus lookalike letters, accent
-substitution and combining marks. The test split has not been run.
+Eighteen transforms: the fourteen `conservative` ones, plus lookalike letters, accent
+substitution, combining marks and leetspeak. The test split has not been run.
 
 | Scored at | Clean texts changed | Recovered exactly | Made worse | Real phishing set |
 |---|---|---|---|---|
 | conservative | 0.01% (1/7442) | 95.5% (3461/3625) | 0.1% (2/3625) | not at this level |
-| balanced | 0.01% (1/7442) | 81.2% (6573/8099) | 0.0% (3/8099) | 81.0% (2431/3000) |
-| aggressive | 0.12% (9/7442) | 82.5% (6852/8309) | 0.0% (2/8309) | 89.4% (2682/3000) |
+| balanced | 0.01% (1/7442) | 85.4% (6918/8099) | 0.0% (3/8099) | 81.1% (2433/3000) |
+| aggressive | 0.12% (9/7442) | 86.6% (7197/8309) | 0.0% (2/8309) | 89.5% (2684/3000) |
 
 On the real phishing set the mean character error falls from 20.4% to 1.5% at `balanced` and to
 0.6% at `aggressive`: most sentences that are not recovered exactly are one or two letters off.
 
-At `balanced`, whole text: homoglyph 93.3%, accent substitution 73.8%, combining marks 96.7%.
+At `balanced`, whole text: homoglyph 93.3%, accent substitution 73.8%, combining marks 96.7%,
+leetspeak 76.0% (86.7% inside clean text). Layered with leetspeak: 60% to 76%.
 
-`balanced` and `aggressive` are still held down by the three tricks with no transform yet
-(leetspeak, separators, repeated characters). The hand-disguised set is at 5 of 25 for the same
-reason.
+`balanced` and `aggressive` are still held down by the two tricks with no transform yet
+(separators, repeated characters). The hand-disguised set is at 6 of 25.
 
 Most of the rise since 2026-10-09 (phishing set 57.1% to 81.0% at `balanced`) came from one
 engine change, not from a new rule: all proposals of a certain transform are now applied in one
@@ -131,6 +131,8 @@ real text messages with HTML entities 100% (136/136). By length: under 20 charac
 
 Weak spots:
 
+- **Leetspeak, whole text: 76%.** Most misses are a capital letter hidden behind a digit
+  (`@rmy` for "Army" comes back as "army") and names that are not in the word list.
 - **Accent substitution inside otherwise clean text: 62%** at `balanced` (whole text 74%). A
   single word with everyday accents, or a name, is left alone without more evidence.
 - Shifted or reversed words inside otherwise clean text: Caesar 65%, rot13 68%, reversal 28%.

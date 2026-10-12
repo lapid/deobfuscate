@@ -10,22 +10,23 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 3. Read the document for the area you will touch (table below) before changing anything.
 4. Open `JOURNAL.md` only when you need the reason behind a decision; search it by keyword.
 
-## Current status (updated 2026-10-11)
+## Current status (updated 2026-10-12)
 
 - **Done:** scope and decisions (Phase 0), research (Phase 0.5), evaluation harness (Phase 1),
   core engine and scorer (Phase 2), and two of three groups of Phase 3.
-- **Phase 3 so far:** seventeen transforms. The fourteen that run at `conservative` (invisible
+- **Phase 3 so far:** eighteen transforms. The fourteen that run at `conservative` (invisible
   characters, hidden text, styled and fullwidth letters, HTML, URL and backslash escapes, base64,
   hex, binary, decimal codes, rot13, Caesar shifts, reversal), plus `homoglyph`,
-  `accent-substitution` and `combining-marks` at `balanced`, with a looser lookalike variant at
-  `aggressive`.
-- **Next:** the rest of the third group: `leetspeak`, then `separator`, `repeated-chars`. Then Phase 4 (tune the presets, error analysis, final run on test),
+  `accent-substitution`, `combining-marks` and `leetspeak` at `balanced`, with a looser
+  lookalike variant at `aggressive`.
+- **Next:** the rest of the third group: `separator`, then `repeated-chars`. Then Phase 4 (tune the presets, error analysis, final run on test),
   Phase 5, Phase 6.
 - **Numbers on dev:** clean texts changed 1, 1 and 9 of 7,442 at the three levels; recovery
-  95.5% at `conservative`; real phishing set 81.0% at `balanced` and 89.4% at `aggressive`.
+  95.5% at `conservative`; all obfuscated samples 85.4% at `balanced`; real phishing set 81.1% at `balanced` and
+  89.5% at `aggressive`.
   Full table in `docs/evaluation.md`.
 - **Known problems:** a lone disguised word with everyday accents, or a lone Greek "a", is left
-  alone at `balanced`; digit `0` for `o` is not handled; shifted or reversed words inside clean
+  alone at `balanced`; a capital hidden behind a leetspeak digit is lost; shifted or reversed words inside clean
   text recover poorly; the presets have not had a tuning pass; no recogniser yet for key-like
   tokens or code.
 - **Waiting on the owner:** checking the test half of `data/human/to_disguise.txt` for answers

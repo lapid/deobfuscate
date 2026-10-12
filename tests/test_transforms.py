@@ -137,6 +137,39 @@ class CombiningMarksTest(unittest.TestCase):
                 self.assertEqual(run(text, level).text, text, (level, text))
 
 
+class LeetspeakTest(unittest.TestCase):
+    def test_digits_and_symbols_for_letters(self):
+        for text, plain in (
+            ("Please c0nfirm your acc0unt p@ssw0rd today", "Please confirm your account password today"),
+            ("7h3 m33ting is m0v3d to the s3c0nd fl00r.", "The meeting is moved to the second floor."),
+            ("Send the rep0rt bef0re FR1DAY m0rning", "Send the report before FRIDAY morning"),
+            ("See you in @pril, y0u will l1ke it", "See you in April, you will like it"),
+        ):
+            result = run(text, "balanced")
+            self.assertEqual(result.text, plain)
+            self.assertEqual({step.transform for step in result.steps}, {"leetspeak"})
+            self.assertEqual(run(text).text, text)
+
+    def test_together_with_lookalike_letters(self):
+        # The first letter of each disguised word is Cyrillic.
+        text = "Please confirm your \u0430cc0unt and \u0440assw0rd"
+        self.assertEqual(run(text, "balanced").text, "Please confirm your account and password")
+
+    def test_shorthand_numbers_and_codes_stay(self):
+        for text in (
+            "c u l8r, gr8 2 see u b4 2day, sum1 will w8 4 u",
+            "Meet at 5am or 3pm, it costs $5m, the 1st and 3rd are free.",
+            "Runs on win7 and python3, see test5, the MP3 and the sha1 of level5.",
+            "Ask @mark or @rose about the print$ share and the HP G5 or the M14.",
+        ):
+            for level in ("balanced", "aggressive"):
+                self.assertEqual(run(text, level).text, text, (level, text))
+
+    def test_shorthand_next_to_leetspeak_stays(self):
+        result = run("It was gr8, thx 4ever, the c0d3 word is next", "balanced")
+        self.assertEqual(result.text, "It was gr8, thx 4ever, the code word is next")
+
+
 class LeaveAloneTest(unittest.TestCase):
     def untouched(self, *texts: str) -> None:
         for level in ("conservative", "balanced"):

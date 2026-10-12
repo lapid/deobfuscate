@@ -14,6 +14,7 @@ from itertools import islice, product
 from deobfuscate import resources, scorer
 from deobfuscate.scripts import script_of
 from deobfuscate.transforms.base import Candidate, Transform
+from deobfuscate.transforms.leet import read as read_leet
 
 # Letters of any alphabet, with apostrophes allowed inside.
 WORD = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*")
@@ -78,6 +79,36 @@ class Reading:
     odd_accents: bool
 
 
+# What may sit next to the word inside one leetspeak token.
+LEET_TOKEN = re.compile(r"(?:[^\W_]|[@$!])+")
+
+
+def known_with_digits(match: re.Match) -> bool:
+    """Whether the word is part of a token that also uses digits for letters ("аcc0unt")
+
+    and the token is a known word once both tricks are read.
+    """
+    text = match.string
+    for token in LEET_TOKEN.finditer(text, max(0, match.start() - 40), match.end() + 40):
+        if token.start() <= match.start() and match.end() <= token.end():
+            break
+    else:
+        return False
+    chunk = token.group().rstrip("!")
+    if chunk == match.group():
+        return False
+    plain = []
+    for char in chunk:
+        if char.isascii():
+            plain.append(char)
+        elif (found := readings(char)) is not None:
+            plain.append(found[0][0])
+        else:
+            return False
+    found = read_leet("".join(plain))
+    return found is not None and found[1]
+
+
 def read_word(match: re.Match) -> Reading | None:
     """The plain-letter reading of a word with non-ASCII letters, if it has one."""
     word = match.group()
@@ -100,6 +131,8 @@ def read_word(match: re.Match) -> Reading | None:
         if scorer.is_word("".join(combo)):
             plain, known = "".join(combo), True
             break
+    if not known:
+        known = known_with_digits(match)
     letters = [char for char in word if char.isalpha()]
     return Reading(
         match.start(), match.end(), plain, known, "foreign" in kinds,
