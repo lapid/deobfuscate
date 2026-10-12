@@ -2,7 +2,7 @@
 
 Takes a text and returns the deobfuscated text, plus a record of which transforms were applied.
 
-**Status: in development. Encodings, escapes, invisible characters and styled letters are undone, including when layered. Lookalike letters, added accents, overlaid marks, leetspeak and spaced-out words are undone at the `balanced` level, and stretched words, texting shorthand, common misspellings and emoji standing for a word at `aggressive`. The strictness presets have not been tuned yet and the final test run has not been done.**
+**Status: in development. Encodings, escapes, invisible characters and styled letters are undone, including when layered. Lookalike letters, added accents, overlaid marks, leetspeak and spaced-out words are undone at the `balanced` level, and stretched words, texting shorthand, common misspellings and emoji standing for a word at `aggressive`. On the held-out test set, 0.04% of clean texts are changed at the default level, 0.17% at `balanced` and 0.51% at `aggressive`, and 96.6%, 91.3% and 88.9% of disguised texts come back exactly (ignoring capitals); details and weak spots in `docs/evaluation.md`. Not yet packaged or released.**
 
 ## What it will handle
 

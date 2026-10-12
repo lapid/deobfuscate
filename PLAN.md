@@ -204,14 +204,18 @@ Thresholds (dev only):
   split is no longer unseen
 
 Final test run:
-- [ ] Owner has checked the test half of `data/human/to_disguise.txt` (or agreed to run without)
-- [ ] Owner gives the go-ahead for the run; it is done once
-- [ ] Run `uv run python -m evaluation.run --split test --detail` at the three levels, with the
+- [x] Owner has checked the test half of `data/human/to_disguise.txt` (or agreed to run without):
+  run without the check, by the owner's choice
+- [x] Owner gives the go-ahead for the run; it is done once (2026-10-12)
+- [x] Run `uv run python -m evaluation.run --split test --detail` at the three levels, with the
   real-world set and the hand-disguised test sentences
-- [ ] Record the test numbers next to the dev numbers in `docs/evaluation.md`, `README.md` and
+- [x] Record the test numbers next to the dev numbers in `docs/evaluation.md`, `README.md` and
   `AGENTS.md`, with the gap between them; compare against the provisional targets
-- [ ] Do not fix anything in response to the test numbers in version 1; list what they show
+- [x] Do not fix anything in response to the test numbers in version 1; list what they show
   as known problems
+- [ ] Owner's further set, never seen by the agent: run it when it arrives and record the numbers
+- [ ] Owner to decide: read the 13 test clean texts changed at `balanced` to find the cause
+  (costs the test split's remaining independence), or leave it
 
 ## Phase 5 — Packaging
 

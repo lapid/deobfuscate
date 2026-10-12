@@ -629,6 +629,22 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Frozen (Claude):** no rule or threshold changes until the test run. The run needs the
   owner's go-ahead and, if the owner wants, their check of the test-half answers first.
 
+### 2026-10-12 — The test split was run, once (owner's go-ahead)
+- **Owner:** run it as it is, without checking the test-half answers of the hand-disguised
+  sheet. The owner will also run a further set the agent has never seen.
+- **Run at commit `eb26b8b`**, rules and thresholds frozen. No test sample was read.
+- **Results (test / dev):** clean texts changed 3, 13, 38 / 1, 1, 24 of 7,442; recovered 96.6%,
+  91.3%, 88.9% / 96.1%, 92.3%, 90.0%; real phishing set 88.6%, 92.1% / 90.8%, 94.5%;
+  hand-disguised 5 of 22 at both levels / 15 and 17 of 25.
+- **Reading (Claude):** recovery carries over. Clean texts changed does not: the dev clean set
+  was tuned until almost nothing changed, so its figure was optimistic. The test figures are
+  the ones to quote; all are under the 1% target. The hand-disguised sentences did not carry
+  over, which is the risk recorded in the previous entry.
+- **Nothing was fixed in response**, as planned. The cause of the 13 clean texts changed at
+  `balanced` is unknown because finding it means reading test samples. Left to the owner.
+- **The test split is no longer unseen.** Later changes are judged on dev.
+- **Provisional targets:** met, except accent substitution inside clean text (58% against 70%).
+
 ## Open questions
 
 None needing an answer from the user.

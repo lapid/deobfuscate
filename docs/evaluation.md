@@ -250,6 +250,66 @@ Weak spots:
 - The one clean text changed at `conservative` and `balanced` is a sentence that mentions HTML
   entities ("write `&amp;` to show an ampersand").
 
+## Results on the test split (2026-10-12, run once)
+
+Run after the rules and thresholds were frozen (commit `eb26b8b`). The test half had never been
+run or read before. The owner chose to run without checking the test-half answers of the
+hand-disguised sheet, so that row may include answers typed under the wrong sentence. No failing
+test sample has been read, and nothing was changed in response to these numbers.
+
+| Scored at | | Clean texts changed | Recovered | With every capital right | Made worse | Real phishing set | Hand-disguised |
+|---|---|---|---|---|---|---|---|
+| conservative | test | 0.04% (3/7442) | 96.6% (3500/3623) | 96.6% | 0.1% (2/3623) | not at this level | not at this level |
+| | dev | 0.01% (1/7442) | 96.1% | 96.1% | 0.1% | | |
+| balanced | test | 0.17% (13/7442) | 91.3% (7394/8095) | 91.0% | 0.0% (2/8095) | 88.6% (2658/3000) | 5 of 22 |
+| | dev | 0.01% (1/7442) | 92.3% | 92.0% | 0.0% | 90.8% | 15 of 25 |
+| aggressive | test | 0.51% (38/7442) | 88.9% (7941/8935) | 88.2% | 0.2% (15/8935) | 92.1% (2764/3000) | 5 of 22 |
+| | dev | 0.32% (24/7442) | 90.0% | 89.3% | 0.2% | 94.5% | 17 of 25 |
+
+The output was the same when run twice on all 16,377 texts. Median time per text 1.3 to 1.8 ms.
+
+By trick on test, whole text and inside clean text:
+
+| Trick | Level | Whole text | Inside clean text |
+|---|---|---|---|
+| homoglyph | balanced | 89.3% | 95.0% |
+| accent substitution | balanced | 78.0% | 58.3% |
+| combining marks | balanced | 95.3% | 98.3% |
+| leetspeak | balanced | 85.3% | 75.0% |
+| separators | balanced | 88.0% | 93.3% |
+| reversal | conservative | 98.0% | 43.3% |
+| Caesar shift | conservative | 98.7% | 73.3% |
+| rot13 | conservative | 95.3% | 76.7% |
+| repeated letters | aggressive | 81.3% | 58.3% |
+| misspelling | aggressive | 58.0% | 45.0% |
+| emoji for a word | aggressive | 50.0% | 65.0% |
+| shorthand | aggressive | 18.0% | 23.3% |
+
+What the gap between dev and test shows:
+
+- **Recovery carries over.** It is within about one point of dev at every level (96.6%, 91.3%,
+  88.9% against 96.1%, 92.3%, 90.0%), and the real phishing set within about two points.
+- **Clean texts changed is worse on test than on dev at every level**: 3, 13 and 38 against 1, 1
+  and 24. The rules were shaped until the dev clean set was nearly untouched, so the dev figure
+  was optimistic. The test figures are the ones to quote. All are under the 1% target; at
+  `balanced` it is 1 clean text in about 570.
+- **At `balanced` 12 of the 13 are ordinary prose**, most of them from the transforms added at
+  that level (3 change at `conservative`). Which transforms is not known: the samples have not
+  been read.
+- **The hand-disguised sentences did not carry over: 5 of 22** (23%) against 15 of 25 on dev.
+  The letter readings learned from the dev sentences did not generalise, as warned; the answers
+  were also not checked. Mean character error still falls from 39.5% to 10.1%, so most words
+  come back while few whole sentences do.
+- **Step precision is 93.9% or more for every transform**, and 99% or more for all but accent
+  substitution, leetspeak, misspelling, repeated letters and shorthand.
+
+Against the provisional targets: at most 1% of clean texts changed, met at every level; 90%
+recovery for lossless transforms and encodings, met (96.6%); 70% for ambiguous visual tricks,
+met for whole texts by all five, and inside clean text by all but accent substitution (58%).
+
+The test split is no longer unseen. Any rule change from here on must be judged on dev, and its
+effect on test reported as a second look, not as an unseen result.
+
 ## Known limits
 
 - **The committed obfuscated set is almost all synthetic.** It tests the tricks we thought of,

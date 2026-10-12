@@ -21,20 +21,25 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
   looser lookalike variant, `repeated-chars`, `shorthand`, `misspelling` and `emoji-word` at
   `aggressive`. Gaps left open are unticked in
   `PLAN.md`.
-- **Phase 4 (started by the owner 2026-10-12):** error analysis and the threshold sweep are
-  done. Left: the single run on the test split, which needs the owner's go-ahead. Rules and
-  thresholds are frozen until then; see the Phase 4 checklist in `PLAN.md`.
-- **Next after that:** Phase 5, Phase 6.
+- **Phase 4 done (2026-10-12):** error analysis, threshold sweep, and the single run on the
+  test split. The test split is no longer unseen.
+- **Next:** Phase 5 (packaging), when the owner starts it. Then Phase 6. The owner intends to
+  bring a further set that the agent has never seen.
+- **Numbers on test (the ones to quote):** clean texts changed 3, 13 and 38 of 7,442; recovery
+  96.6%, 91.3% and 88.9%; real phishing set 88.6% at `balanced` and 92.1% at `aggressive`;
+  hand-disguised sentences 5 of 22 at both.
 - **Numbers on dev:** clean texts changed 1, 1 and 24 of 7,442 at the three levels; recovery
   (ignoring capitals) 96.1%, 92.3% and 90.0%; real phishing set 90.8% at `balanced` and 94.5% at
   `aggressive`; hand-disguised sentences 15 and 17 of 25.
   Full table and the sweep in `docs/evaluation.md`.
-- **Known problems:** a lone disguised word with everyday accents, or a lone Greek "a", is left
+- **Known problems:** clean texts changed is higher on test than on dev (13 against 1 at
+  `balanced`), cause not examined; the hand-disguised sentences did not carry over from dev to
+  test; a lone disguised word with everyday accents, or a lone Greek "a", is left
   alone at `balanced`; a capital hidden behind a leetspeak digit is lost; shifted or reversed words inside clean
   text recover poorly; a short text in another language whose words all read as English
   backwards is reversed ("No pasa nada"); no recogniser yet for key-like tokens or code.
-- **Waiting on the owner:** checking the test half of `data/human/to_disguise.txt` for answers
-  typed under the wrong sentence.
+- **Waiting on the owner:** whether to look into the test-split clean texts changed (it would
+  mean reading test samples); the further unseen set.
 - **Deferred to version 2:** see "Version 2" in `PLAN.md` (evaluation gaps, public demo site).
 
 ## How we work with the owner
