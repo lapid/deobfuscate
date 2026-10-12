@@ -169,6 +169,10 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
   - [x] Separator insertion (`s p a c e d`, `s.p.l.i.t`) (`transforms/separator.py`; dev 87%)
   - [x] Repeated characters (`heeellooo`), `aggressive` only (`transforms/repeated.py`; dev 87%
         whole text, 68% inside clean text)
+  - [x] Informal writing at `aggressive` (owner's decision, 2026-10-12): `shorthand`, `misspelling`
+        (common spelling and typing mistakes only), `emoji-word`; run last and on the whole text
+  - [x] Evaluation: recovery ignores capitals; 630 informal-writing samples per split; written-out
+        shorthand accepted against real answers
   - [ ] Separator gaps: letters split off inside a hyphenated word (`sub-o-r-b-i-t-a-l`), spaced
         text in capitals, two words joined by a symbol (`simple_trick`)
 

@@ -540,6 +540,44 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Result on dev:** clean texts changed 1, 1 and 12 of 7,442; all obfuscated samples 95.5%,
   87.7% and 90.9% at the three levels; real phishing set 81.1% and 89.5%; hand-disguised 7 of 25.
 
+### 2026-10-12 — Shorthand, misspellings and emoji-for-words join version 1 (confirmed by the owner)
+- **Decision (owner):** version 1 includes "some misspellings, emojis and shorthand".
+  - **Supersedes** the settled constraints "No spelling correction in v1" and "Shorthand is not
+    obfuscation", and the matching rows under "Out of scope" in `docs/taxonomy.md`.
+- **Level (owner, from Claude's recommendation):** `aggressive` only. At `conservative` and
+  `balanced` this writing still comes back unchanged, so the default behaviour and the headline
+  metric are unaffected.
+- **Breadth of misspelling correction (owner):** "even narrower" than Claude's narrow proposal:
+  "common spelling mistakes and common typing mistakes".
+  - **Claude's reading of that:** a hand-written list of about 130 common misspellings and
+    missing apostrophes, plus two typing slips (neighbouring letters swapped, a letter doubled)
+    in words of six letters or more when exactly one known word results. Dropped letters and
+    wrong keys are not corrected. The owner may widen or narrow this.
+- **Design (Claude):** three transforms, each with its own short list, marked `late`: the engine
+  asks them only when no other transform has anything left, and only on the whole text.
+  - **Why last:** found by the evaluation. Run with the others, `shorthand` turned `ur` inside
+    rot13 text into "your", and turned the lone `u` decoded from `&#117;` inside "Buttons" into
+    "you". Both are fixed by the ordering and covered by a unit test.
+- **Wrong rewrites found on dev and fixed:** `frens` to "ferns", `betta` to "beta", `immed` to
+  "mimed" (typing slips now need six letters); `militaries` to "militarise" (regular endings of
+  known words are now treated as words); the name `Ty` to "Thank you" (read only as `TY`).
+- **Left as is:** `waggon` to "wagon" in old books (3 clean texts).
+
+### 2026-10-12 — Evaluation: capitals ignored, informal text scored separately (owner and Claude)
+- **Capitals (owner):** recovery is measured ignoring capital letters. The strict count is still
+  printed. Clean texts changed stays strict: changing a capital in clean text is a change.
+- **New samples (Claude):** 150 whole-text and 60 partial samples per split for each of the three
+  informal tricks, appended from their own random stream so that no existing row changed
+  (checked: 630 added, 0 removed, in each split).
+- **Clean informal text (Claude):** a clean text message, or a shorthand or emoji sample, changed
+  only by the three informal transforms is reported as "rewritten on purpose", not as a clean
+  text changed. In proofread sources and Stack Exchange it still counts as a change.
+- **Real answers that keep shorthand (Claude):** the phishing set's answers keep `u`. An output
+  is also accepted if it equals the answer as the tool's informal transforms alone would rewrite
+  it. Without this, writing out "you" counted as making the text worse.
+- **Not done:** no check of these rules against data the rule-writer has not seen; that is the
+  test split's job in Phase 4.
+
 ## Open questions
 
 None needing an answer from the user.

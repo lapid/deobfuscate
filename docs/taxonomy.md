@@ -24,6 +24,18 @@ column are the `tricks` labels used in `data/samples/`. Reasons are in `docs/res
 | `separator` | `f r e e`, `c.l.i.c.k` | balanced | High. Initials, abbreviations, spaced headings |
 | `repeated-chars` | `heeellooo` | aggressive | High. Emphasis is often intended; several valid collapses |
 
+### Informal writing (`aggressive` only)
+
+These three are not disguise: people write this way on purpose. They were added to version 1 on
+2026-10-12 at the owner's request, in a narrow form, and run only at `aggressive` and only after
+every other transform has finished.
+
+| Trick | Example | Level | Main guard |
+|---|---|---|---|
+| `shorthand` | `c u l8r`, `thx 4 the msg` | aggressive | A short list of forms with one usual meaning. `2`, `4`, `r`, `c` and forms in capitals only where the neighbouring words make the meaning plain |
+| `misspelling` | `recieve`, `teh`, `adress` | aggressive | A list of common misspellings, plus two typing slips (neighbouring letters swapped, a letter doubled) when exactly one known word results. Names and jargon stay |
+| `emoji-word` | `I ❤️ you`, `Happy 🎂` | aggressive | A short list. Only between words or after a word like "my" or "the". Decorative emoji stay |
+
 Stacked and partial cases are in scope for all of the above: several layers on one span, and an
 obfuscated span inside clean text.
 
@@ -32,9 +44,8 @@ obfuscated span inside clean text.
 | Thing | Example | Why |
 |---|---|---|
 | Wrong-encoding damage | `ú1.20` for `£1.20`, `Ã©` for `é` | Not in v1; a separate problem with dedicated tools. Must come back unchanged |
-| Text-message shorthand | `l8r`, `sum1`, `4` for "for" | Abbreviation, not obfuscation; expanding it rewrites the author's words |
-| Spelling mistakes, dropped letters, slang | `recieve`, `pirze`, `gol`, `gonna` | Would need spelling correction; rewrites the author's words |
-| Emoji standing for a word | 💊 for "medicine" | Meaning, not characters |
+| Uncommon spelling mistakes, dropped letters, slang | `pirze`, `gol`, `gonna` | Would need general spelling correction; rewrites the author's words |
+| Shorthand and emoji outside the short lists | `prolly`, ✨ for "wonderful" | No single usual meaning |
 | Keyed ciphers | Vigenere, XOR | Needs key search; later |
 | Code obfuscation | Minified or packed scripts | Different problem |
 | Languages other than English | | Returned unchanged |

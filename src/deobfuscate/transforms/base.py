@@ -36,6 +36,10 @@ class Transform:
     level: str = "conservative"
     # False for transforms whose proposals are certain and need no plausibility check.
     judged: bool = True
+    # True for transforms that rewrite informal writing rather than undo a disguise.
+    # They are asked only when no other transform has anything left to propose, so
+    # that they never rewrite text that is still encoded ("ur" is rot13 for "he").
+    late: bool = False
     # True if proposals may touch spans the engine protects (URLs, paths, hashes).
     ignores_protection: bool = False
     # The fewest letters a result must contain to be judged, if more than the level asks for.

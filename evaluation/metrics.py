@@ -4,7 +4,7 @@ import statistics
 from collections import defaultdict
 from dataclasses import dataclass, field
 
-from evaluation.tricks import LEVELS, RECORDED_AS, in_scope
+from evaluation.tricks import NORMALISING, LEVELS, RECORDED_AS, in_scope
 
 LENGTH_BUCKETS = (("under 20", 0, 20), ("20 to 59", 20, 60), ("60 to 149", 60, 150), ("150 and over", 150, 10**9))
 
@@ -49,6 +49,16 @@ def counts_at(sample: dict, level: str) -> bool:
     return in_scope(sample["tricks"], level)
 
 
+INFORMAL_CATEGORIES = frozenset({"shorthand", "emoji"})
+# Sources that were proofread: a shorthand or spelling step there is a mistake.
+EDITED_ORIGINS = frozenset({"wikipedia", "wikinews", "books"})
+
+
+def is_informal(sample: dict) -> bool:
+    """Clean text of a kind that is normally written with shorthand, typos and emoji."""
+    return sample.get("origin") == "sms" or sample.get("category") in INFORMAL_CATEGORIES
+
+
 def same(a: str, b: str, sample: dict) -> bool:
     """Equality as the sample defines it: some sources supply lowercased answers."""
     return a.casefold() == b.casefold() if sample.get("caseless") else a == b
@@ -70,6 +80,10 @@ class Outcome:
     transforms: list[str]
     second_pass: str
     seconds: float
+    # The expected text as the system would rewrite it using only the transforms for
+    # informal writing, if that differs. Answers from real messages keep their shorthand
+    # ("u"), and a system that writes it out ("you") has still recovered the text.
+    expected_rewritten: str | None = None
 
 
 @dataclass
@@ -90,11 +104,18 @@ class Tally:
 class Report:
     # Clean set: a "hit" is a text that was changed. Lower is better.
     false_change: Tally = field(default_factory=Tally)
+    # Clean informal texts (text messages, shorthand, emoji) changed only by the
+    # transforms that rewrite informal writing. That is what those transforms are for,
+    # so these are counted here and not as false changes.
+    normalised: Tally = field(default_factory=Tally)
     false_change_by_category: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     false_change_by_length: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     false_change_by_origin: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     # Obfuscated set, samples the strictness level is expected to handle.
+    # Recovery ignores capitals: a capital hidden by a disguise is often not recoverable,
+    # and a reader loses nothing by it. ``recovered_with_capitals`` is the strict count.
     recovered: Tally = field(default_factory=Tally)
+    recovered_with_capitals: Tally = field(default_factory=Tally)
     recovered_by_category: dict[tuple[str, str], Tally] = field(default_factory=lambda: defaultdict(Tally))
     recovered_by_length: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
     recovered_by_mode: dict[str, Tally] = field(default_factory=lambda: defaultdict(Tally))
@@ -140,28 +161,40 @@ def score(outcomes: list[Outcome], level: str) -> Report:
             for name in gold & found:
                 report.transform_true[name] += 1
             for name in found - gold:
-                report.transform_false[name] += 1
+                # Real informal text has shorthand and typos of its own; rewriting them is not a wrong step.
+                if not (name in NORMALISING and sample.get("origin") not in EDITED_ORIGINS):
+                    report.transform_false[name] += 1
             if expected_here:
                 for name in gold - found:
                     report.transform_missed[name] += 1
 
         if not tricks:
             changed = not same(outcome.output, expected, sample)
+            if is_informal(sample):
+                rewritten = changed and set(outcome.transforms) <= NORMALISING
+                report.normalised.add(rewritten)
+                changed = changed and not rewritten
             report.false_change.add(changed)
             report.false_change_by_category[sample["category"]].add(changed)
             report.false_change_by_length[length_bucket(expected)].add(changed)
             report.false_change_by_origin[sample.get("origin", "unknown")].add(changed)
             continue
 
-        fold = str.casefold if sample.get("caseless") else str
-        exact = same(outcome.output, expected, sample)
+        fold = str.casefold
+        exact = fold(outcome.output) == fold(expected)
+        if not exact and outcome.expected_rewritten is not None:
+            exact = fold(outcome.output) == fold(outcome.expected_rewritten)
+            expected = outcome.expected_rewritten if exact else expected
         before = edit_distance(fold(text), fold(expected))
         after = 0 if exact else edit_distance(fold(outcome.output), fold(expected))
+        if after and outcome.expected_rewritten is not None:
+            after = min(after, edit_distance(fold(outcome.output), fold(outcome.expected_rewritten)))
         if not expected_here:
             report.out_of_scope_recovered.add(exact)
             report.out_of_scope_made_worse.add(after > before)
             continue
         report.recovered.add(exact)
+        report.recovered_with_capitals.add(same(outcome.output, expected, sample))
         report.recovered_by_category[(sample["mode"], sample["category"])].add(exact)
         report.recovered_by_length[length_bucket(expected)].add(exact)
         report.recovered_by_mode[sample["mode"]].add(exact)

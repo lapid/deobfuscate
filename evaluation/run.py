@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 
 from evaluation import metrics, systems
-from evaluation.tricks import LEVELS
+from evaluation.tricks import LEVELS, NORMALISING
 
 ROOT = Path(__file__).resolve().parent.parent
 EVAL = ROOT / "data" / "eval"
@@ -39,7 +39,12 @@ def run(system: systems.System, samples: list[dict]) -> list[metrics.Outcome]:
         started = time.perf_counter()
         output, transforms = system(sample["text"])
         seconds = time.perf_counter() - started
-        outcomes.append(metrics.Outcome(sample, output, transforms, system(output)[0], seconds))
+        rewritten = None
+        if sample["tricks"] and output != sample["expected"]:
+            again, used = system(sample["expected"])
+            if again != sample["expected"] and set(used) <= NORMALISING:
+                rewritten = again
+        outcomes.append(metrics.Outcome(sample, output, transforms, system(output)[0], seconds, rewritten))
     return outcomes
 
 
@@ -54,7 +59,9 @@ def tally(item: metrics.Tally) -> str:
 def print_report(title: str, report: metrics.Report, detail: bool) -> None:
     print(f"\n=== {title} ===")
     print(f"Clean texts changed (lower is better)   {tally(report.false_change)}")
-    print(f"Obfuscated texts recovered exactly      {tally(report.recovered)}")
+    print(f"Informal clean texts rewritten on purpose {tally(report.normalised)}")
+    print(f"Obfuscated texts recovered              {tally(report.recovered)}")
+    print(f"  with every capital letter right       {tally(report.recovered_with_capitals)}")
     print(f"Obfuscated texts made worse             {tally(report.made_worse)}")
     print(f"Mean character error, before -> after   {pct(report.mean_error_rate(False))} -> {pct(report.mean_error_rate(True))}")
     print(f"Above this level: recovered / worse     {tally(report.out_of_scope_recovered)} / {tally(report.out_of_scope_made_worse)}")

@@ -93,11 +93,16 @@ class Engine:
         # Certain transforms go first, until none applies. Judged transforms then
         # see text free of invisible characters and escapes, which would otherwise
         # break words apart and mislead them.
-        for judged in (False, True):
+        # Last of all, and only on the whole text, come the transforms that rewrite
+        # informal writing. A decoded fragment can be a single letter of a longer
+        # word, and must not be read as shorthand on its own.
+        for judged, late in ((False, False), (True, False), (False, True)):
+            if late and depth:
+                continue
             best: Accepted | None = None
             together: list[Accepted] = []
             for transform in self.transforms:
-                if transform.judged != judged:
+                if transform.judged != judged or transform.late != late:
                     continue
                 verdicts = []
                 for candidate in transform.propose(text):

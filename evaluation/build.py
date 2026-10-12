@@ -14,7 +14,7 @@ from pathlib import Path
 from random import Random
 
 from evaluation import negatives, obfuscator
-from evaluation.tricks import TRICK_LEVEL
+from evaluation.tricks import NORMALISING, TRICK_LEVEL
 
 ROOT = Path(__file__).resolve().parent.parent
 EVAL = ROOT / "data" / "eval"
@@ -69,7 +69,23 @@ def obfuscated_rows(split: str, corpus: list[dict], real: list[dict], rng: Rando
         pool = [row for row in corpus if len(row["text"]) <= 120] if short else corpus
         return rng.sample(pool, k=count)
 
+    def single(trick: str, rng: Random) -> None:
+        for row in rng.sample(corpus, k=WHOLE_PER_TRICK * 6):
+            if sum(sample["category"] == trick and sample["mode"] == "whole" for sample in rows[-WHOLE_PER_TRICK:]) == WHOLE_PER_TRICK:
+                break
+            add(obfuscator.apply(trick, row["text"], rng), row["text"], [trick], "whole", row)
+        made = 0
+        for row in rng.sample(corpus, k=PARTIAL_PER_TRICK * 6):
+            if made == PARTIAL_PER_TRICK:
+                break
+            text = obfuscator.apply_partial(trick, row["text"], rng)
+            if text is not None:
+                add(text, row["text"], [trick], "partial", row)
+                made += 1
+
     for trick in TRICK_LEVEL:
+        if trick in NORMALISING:
+            continue
         if trick == "tag-characters":
             for row in sources(WHOLE_PER_TRICK):
                 text, hidden = obfuscator.tag_characters(row["text"], rng)
@@ -93,6 +109,12 @@ def obfuscated_rows(split: str, corpus: list[dict], real: list[dict], rng: Rando
     # Real messages, not produced by our obfuscator.
     for row in real:
         add(row["text"], row["expected"], row["tricks"], "real", row)
+
+    # Added after the sets were first built. They come last and draw from their own
+    # random stream, so every earlier row is unchanged.
+    later = Random(f"{SEED}-{split}-normalising")
+    for trick in sorted(NORMALISING):
+        single(trick, later)
     return rows
 
 

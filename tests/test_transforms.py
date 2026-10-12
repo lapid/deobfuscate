@@ -157,13 +157,16 @@ class LeetspeakTest(unittest.TestCase):
 
     def test_shorthand_numbers_and_codes_stay(self):
         for text in (
-            "c u l8r, gr8 2 see u b4 2day, sum1 will w8 4 u",
             "Meet at 5am or 3pm, it costs $5m, the 1st and 3rd are free.",
             "Runs on win7 and python3, see test5, the MP3 and the sha1 of level5.",
             "Ask @mark or @rose about the print$ share and the HP G5 or the M14.",
         ):
             for level in ("balanced", "aggressive"):
                 self.assertEqual(run(text, level).text, text, (level, text))
+
+    def test_shorthand_stays_below_the_aggressive_level(self):
+        text = "c u l8r, gr8 2 see u b4 2day, sum1 will w8 4 u"
+        self.assertEqual(run(text, "balanced").text, text)
 
     def test_shorthand_next_to_leetspeak_stays(self):
         result = run("It was gr8, thx 4ever, the c0d3 word is next", "balanced")
@@ -212,6 +215,67 @@ class RepeatedCharsTest(unittest.TestCase):
 
     def test_one_short_stretched_word_is_emphasis(self):
         for text in ("Hmmm, that is odd.", "It was sooooo good.", "Yessss we won", "See www.example.com or page III"):
+            self.assertEqual(run(text, "aggressive").text, text)
+
+
+class InformalWritingTest(unittest.TestCase):
+    """Shorthand, common misspellings and emoji for words: rewritten only at ``aggressive``."""
+
+    def rewritten(self, text: str, plain: str, name: str) -> None:
+        result = run(text, "aggressive")
+        self.assertEqual(result.text, plain)
+        self.assertEqual({step.transform for step in result.steps}, {name})
+        for level in ("conservative", "balanced"):
+            self.assertEqual(run(text, level).text, text, level)
+
+    def test_shorthand(self):
+        self.rewritten("c u l8r 2nite, thx 4 the gr8 msg", "see you later tonight, thanks for the great message", "shorthand")
+        self.rewritten("pls txt me b4 u go 2 the shop", "please text me before you go to the shop", "shorthand")
+
+    def test_numbers_letters_and_labels_are_not_shorthand(self):
+        for text in (
+            "Take route 2 the left, then 4 people came for U Thant.",
+            "Vitamin C and plan B, as J. R. R. Tolkien wrote in chapter 4.",
+            "Add MSG and a TXT record, then page 2 of the PPL manual.",
+        ):
+            self.assertEqual(run(text, "aggressive").text, text)
+
+    def test_common_misspellings_and_typing_mistakes(self):
+        self.rewritten(
+            "I recieved teh pasword for my adress, it is definately wierd",
+            "I received the password for my address, it is definitely weird",
+            "misspelling",
+        )
+        self.rewritten("Please send the reprot before Friday mornning", "Please send the report before Friday morning", "misspelling")
+
+    def test_names_jargon_and_unclear_mistakes_stay(self):
+        for text in (
+            "Kowalczyk and Nakamura met Oyelaran in Reykjavik.",
+            "The kubectl daemon restarts nginx after systemd reloads.",
+            "He said teh in Dutch: wij hebben het boek gelezen vandaag.",
+            "The cta button needs a new colour.",
+        ):
+            self.assertEqual(run(text, "aggressive").text, text)
+
+    def test_a_decoded_fragment_is_not_read_as_shorthand(self):
+        # One letter written as an HTML entity inside a word, and a whole encoded sentence.
+        sentence = "Plain metal buttons for the coats"
+        self.assertEqual(run(sentence.replace("u", "&#117;"), "aggressive").text, sentence)
+        for trick in ("rot13", "base64"):
+            disguised = obfuscator.apply(trick, SENTENCES[0], random.Random(1))
+            self.assertEqual(run(disguised, "aggressive").text, SENTENCES[0], trick)
+
+    def test_emoji_for_a_word(self):
+        self.rewritten("I \u2764\ufe0f you and my \U0001f436", "I love you and my dog", "emoji-word")
+        self.rewritten("Order your \U0001f48a without a doctor.", "Order your medicine without a doctor.", "emoji-word")
+
+    def test_decorative_emoji_stay(self):
+        for text in (
+            "Great job \U0001f44d see you soon",
+            "We had pizza \U0001f355 and it was great.",
+            "Happy birthday!! \U0001f389\U0001f382\U0001f973",
+            "On my way \U0001f697\U0001f4a8 be there in 5",
+        ):
             self.assertEqual(run(text, "aggressive").text, text)
 
 

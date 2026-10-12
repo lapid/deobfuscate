@@ -14,17 +14,18 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 
 - **Done:** scope and decisions (Phase 0), research (Phase 0.5), evaluation harness (Phase 1),
   core engine and scorer (Phase 2), and all the transforms of Phase 3.
-- **Phase 3:** twenty transforms. The fourteen that run at `conservative` (invisible
+- **Phase 3:** twenty-three transforms. The fourteen that run at `conservative` (invisible
   characters, hidden text, styled and fullwidth letters, HTML, URL and backslash escapes, base64,
   hex, binary, decimal codes, rot13, Caesar shifts, reversal), plus `homoglyph`,
   `accent-substitution`, `combining-marks`, `leetspeak` and `separator` at `balanced`, and a
-  looser lookalike variant and `repeated-chars` at `aggressive`. Gaps left open are unticked in
+  looser lookalike variant, `repeated-chars`, `shorthand`, `misspelling` and `emoji-word` at
+  `aggressive`. Gaps left open are unticked in
   `PLAN.md`.
 - **Next:** Phase 4 (tune the presets, error analysis, final run on test), when the owner starts
   it. Then Phase 5, Phase 6.
-- **Numbers on dev:** clean texts changed 1, 1 and 12 of 7,442 at the three levels; recovery
-  95.5% at `conservative`, 87.7% at `balanced`, 90.9% at `aggressive`; real phishing set 81.1% at `balanced` and
-  89.5% at `aggressive`.
+- **Numbers on dev:** clean texts changed 1, 1 and 26 of 7,442 at the three levels; recovery
+  (ignoring capitals) 95.5%, 88.0% and 87.9%; real phishing set 81.1% at `balanced` and 89.5% at
+  `aggressive`.
   Full table in `docs/evaluation.md`.
 - **Known problems:** a lone disguised word with everyday accents, or a lone Greek "a", is left
   alone at `balanced`; a capital hidden behind a leetspeak digit is lost; shifted or reversed words inside clean
@@ -84,8 +85,10 @@ Each document has one job. Update it in the same commit as the change it describ
 - **Scope:** encodings (base64, hex, rot13, URL and HTML escapes) and visual tricks (homoglyphs,
   accent substitution, leetspeak, invisible characters, inserted separators). The full list is
   `docs/taxonomy.md`. Code obfuscation is out.
-- **No spelling correction** in v1: misspellings, dropped letters, shorthand and emoji standing
-  for a word are left as written.
+- **Informal writing, narrowly, at `aggressive` only** (owner, 2026-10-12): texting shorthand,
+  common spelling mistakes and common typing mistakes, and emoji standing for a word. Each uses a
+  short list. Uncommon misspellings, dropped letters and slang are left as written. Below
+  `aggressive` all of it comes back unchanged.
 - **Both causes:** accidental mess and deliberate evasion. The tool never claims completeness.
 - **English only.** Other languages and scripts pass through unchanged.
 - **Worst mistake is changing clean text.** A transform is applied only when a plausibility score
@@ -112,8 +115,10 @@ Each document has one job. Update it in the same commit as the change it describ
   and labels. No abusive content. The obfuscator ships as evaluation tooling.
 - **Homoglyphs:** use only the non-ASCII-to-ASCII entries of `data/reference/confusables.txt`.
   Never apply the table directly; it maps `m` to `rn` and `1` to `l`.
-- **Shorthand is not obfuscation:** `l8r`, `sum1`, `4` for "for" stay as written. Leetspeak
-  decoding requires the result to be a known word.
+- **Shorthand is not leetspeak:** `l8r`, `sum1`, `4` for "for" are never read as leetspeak, and
+  stay as written below `aggressive`. Leetspeak decoding requires the result to be a known word.
+- **Informal-writing transforms run last** and only on the whole text (`late = True`).
+- **Recovery is measured ignoring capitals**; clean texts changed is measured strictly.
 - **Hidden text in invisible characters** is removed from the output and shown in the step record.
 - **Wrong-encoding damage** (`Ã©` for `é`) is out of v1 and must come back unchanged.
 - **Scorer data:** word list from SCOWL; character n-gram table built by our own script from

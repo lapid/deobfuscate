@@ -37,6 +37,10 @@ How the deobfuscator works inside. Read this before adding or changing a transfo
    part of it. Its step is recorded, followed by the steps found inside it, with their positions
    shifted to where the replacement now sits.
 7. Repeat from 1 until no candidate is accepted.
+8. **Informal writing comes last.** Transforms marked `late = True` (`shorthand`, `misspelling`,
+   `emoji-word`) are asked only when nothing else has anything to propose, and only on the whole
+   text, never on a decoded fragment. Otherwise they rewrite text that is still encoded: `ur` is
+   rot13 for "he", and `&#117;` inside a word decodes to a lone `u`.
 
 Because every accepted judged step must raise the score, the loop cannot go round in circles,
 and a second run over the output finds nothing more to do.
@@ -74,6 +78,7 @@ The values were set while building the transforms and still need a proper tuning
 | `leetspeak` | `leet.py` | no | Balanced and up. Decided token by token; rules below |
 | `separator` | `separator.py` | no | Balanced and up. Decided run by run; rules below |
 | `repeated-chars` | `repeated.py` | no | Aggressive only. Decided word by word; rules below |
+| `shorthand`, `misspelling`, `emoji-word` | `shorthand.py`, `misspelling.py`, `emoji.py` | no | Aggressive only, and last. Each holds its own short list; rules in the module docstrings and `docs/taxonomy.md` |
 | `base64` | `base64.py` | yes | Both alphabets; reported as `base64` |
 | `hex`, `binary`, `decimal-codes` | `bytes.py` | yes | Must decode to readable UTF-8 |
 | `rot13`, `caesar` | `caesar.py` | yes | Whole text, or runs of words that are not English as they stand |
@@ -194,6 +199,6 @@ either way (a name) needs two others.
 
 ## State on 2026-10-12
 
-All twenty transforms exist: the fourteen at `conservative`; `homoglyph`,
+Twenty-three transforms exist: the fourteen at `conservative`; `homoglyph`,
 `accent-substitution`, `combining-marks`, `leetspeak` and `separator` at `balanced`; and
-`repeated-chars` at `aggressive`. Phase 3 is complete apart from the gaps listed in `PLAN.md`.
+`repeated-chars`, `shorthand`, `misspelling` and `emoji-word` at `aggressive`. Phase 3 is complete apart from the gaps listed in `PLAN.md`.

@@ -133,8 +133,14 @@ class ObfuscatorTest(unittest.TestCase):
             self.assertGreater(len(changed), len(text))
 
     def test_partial_keeps_the_rest_of_the_text(self):
+        # Holds words that every trick can act on, including those that swap listed words.
         text = "one two three four five six seven eight nine ten eleven twelve"
+        listed = "see you before the people love your house and receive your other book for the first time today"
         for trick in obfuscator.TRICKS:
+            if trick in ("shorthand", "misspelling", "emoji-word"):
+                changed = obfuscator.apply(trick, listed, random.Random(1))
+                self.assertNotEqual(changed, listed, trick)
+                continue
             for seed in range(10):
                 changed = obfuscator.apply_partial(trick, text, random.Random(seed))
                 self.assertIsNotNone(changed, trick)

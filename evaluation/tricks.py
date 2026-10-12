@@ -28,7 +28,14 @@ TRICK_LEVEL = {
     "leetspeak": "balanced",
     "separator": "balanced",
     "repeated-chars": "aggressive",
+    "shorthand": "aggressive",
+    "misspelling": "aggressive",
+    "emoji-word": "aggressive",
 }
+
+# Informal writing rather than disguise. Rewriting it is asked for only at the
+# ``aggressive`` level, and it is how people normally write text messages.
+NORMALISING = frozenset({"shorthand", "misspelling", "emoji-word"})
 
 # Tricks that replace a span with an opaque token. In a partial sample they
 # need a span long enough to be recognisable.

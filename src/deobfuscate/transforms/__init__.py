@@ -4,14 +4,17 @@ from deobfuscate.transforms.base import Candidate, Transform
 from deobfuscate.transforms.base64 import Base64
 from deobfuscate.transforms.bytes import Binary, DecimalCodes, Hex
 from deobfuscate.transforms.caesar import Caesar
+from deobfuscate.transforms.emoji import EmojiWord
 from deobfuscate.transforms.escapes import BackslashEscape, HtmlEntity, UrlPercent
 from deobfuscate.transforms.invisible import TagCharacters, ZeroWidth
 from deobfuscate.transforms.leet import Leetspeak
 from deobfuscate.transforms.lookalike import Lookalike
 from deobfuscate.transforms.marks import CombiningMarks
+from deobfuscate.transforms.misspelling import Misspelling
 from deobfuscate.transforms.repeated import RepeatedChars
 from deobfuscate.transforms.reverse import Reverse
 from deobfuscate.transforms.separator import Separator
+from deobfuscate.transforms.shorthand import Shorthand
 from deobfuscate.transforms.styled import Fullwidth, StyledAlphabet
 
 ALL: tuple[Transform, ...] = (
@@ -26,6 +29,9 @@ ALL: tuple[Transform, ...] = (
     Leetspeak(),
     Separator(),
     RepeatedChars(),
+    Shorthand(),
+    Misspelling(),
+    EmojiWord(),
     Lookalike("homoglyph"),
     Lookalike("accent-substitution"),
     Lookalike("homoglyph", level="aggressive", loose=True),

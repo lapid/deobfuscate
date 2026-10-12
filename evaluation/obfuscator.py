@@ -257,6 +257,101 @@ def repeated_chars(text: str, rng: Random) -> str:
     return _on_some_words(text, rng, change, rate=0.4, min_len=3)
 
 
+# The generator's own lists. The deobfuscator has separate, shorter ones, so that
+# these samples measure what it misses as well as what it knows.
+SHORTHAND = {
+    "you": ("u",), "your": ("ur",), "are": ("r",), "for": ("4",), "to": ("2",), "later": ("l8r",),
+    "great": ("gr8",), "before": ("b4",), "please": ("pls", "plz"), "thanks": ("thx", "thnx", "tnx"),
+    "tomorrow": ("tmrw", "2moro", "2mrw"), "tonight": ("2nite",), "today": ("2day",), "people": ("ppl",),
+    "because": ("bc", "cuz", "coz"), "message": ("msg",), "text": ("txt",), "about": ("abt",),
+    "though": ("tho",), "through": ("thru",), "love": ("luv",), "night": ("nite",), "see": ("c",),
+    "be": ("b",), "someone": ("sum1", "some1"), "anyone": ("any1",), "everyone": ("every1",),
+    "forever": ("4ever",), "wait": ("w8",), "mate": ("m8",), "and": ("n",), "have": ("hv",),
+    "with": ("w/",), "what": ("wat", "wot"), "good": ("gd",),
+    "weekend": ("wknd",), "really": ("rly",), "know": ("kno",), "from": ("frm",), "just": ("jst",),
+    "birthday": ("bday",), "why": ("y",), "okay": ("k",), "tonite": ("2nite",), "between": ("btwn",),
+    "without": ("w/o",), "something": ("sth", "smth"), "probably": ("prob", "prolly"), "would": ("wud",),
+    "could": ("cud",), "should": ("shud",), "going": ("goin",), "little": ("lil",), "enough": ("enuf",),
+}
+COMMON_MISSPELLINGS = {
+    "receive": "recieve", "definitely": "definately", "separate": "seperate", "until": "untill",
+    "which": "wich", "because": "becuase", "their": "thier", "believe": "beleive",
+    "government": "goverment", "tomorrow": "tommorow", "beginning": "begining", "different": "diffrent",
+    "friend": "freind", "really": "realy", "address": "adress", "business": "buisness",
+    "calendar": "calender", "necessary": "neccessary", "occurred": "occured", "the": "teh",
+    "and": "adn", "with": "wiht", "that": "taht", "about": "abuot", "people": "poeple",
+    "would": "woudl", "should": "shoudl", "weird": "wierd", "known": "konwn", "first": "frist",
+    "other": "ohter", "between": "bewteen", "another": "antoher", "there": "tehre", "after": "afetr",
+    "national": "natoinal", "several": "severall", "following": "folowing", "including": "inculding",
+    "however": "howver", "during": "durring", "important": "importnat", "although": "allthough",
+}
+KEYBOARD_ROWS = ("qwertyuiop", "asdfghjkl", "zxcvbnm")
+EMOJI_WORDS = {
+    "love": "❤️", "heart": "❤️", "fire": "🔥", "money": "💰", "phone": "📱", "call": "📞", "email": "📧",
+    "house": "🏠", "home": "🏠", "car": "🚗", "gift": "🎁", "key": "🔑", "world": "🌍", "sun": "☀️",
+    "moon": "🌙", "star": "⭐", "dog": "🐶", "cat": "🐱", "book": "📖", "books": "📚", "computer": "💻",
+    "birthday": "🎂", "cake": "🍰", "medicine": "💊", "coffee": "☕", "pizza": "🍕", "beer": "🍺",
+    "bank": "🏦", "eyes": "👀", "music": "🎵", "rain": "🌧️", "snow": "❄️", "tree": "🌳", "flower": "🌸",
+    "fish": "🐟", "bird": "🐦", "horse": "🐴", "king": "👑", "school": "🏫", "hospital": "🏥",
+    "church": "⛪", "plane": "✈️", "train": "🚆", "ship": "🚢", "bus": "🚌", "water": "💧", "city": "🏙️",
+    "mountain": "⛰️", "baby": "👶", "police": "👮", "camera": "📷", "film": "🎬", "football": "⚽",
+    "game": "🎮", "letter": "✉️", "idea": "💡", "time": "⏰", "wine": "🍷", "island": "🏝️", "bridge": "🌉",
+}
+
+
+def _on_listed_words(text: str, rng: Random, table: dict, rate: float) -> str:
+    """Swap a random share of the words found in ``table``, and at least one if any is there."""
+    matches = [m for m in WORD.finditer(text) if m.group().lower() in table]
+    if not matches:
+        return text
+    chosen = {m.start() for m in matches if rng.random() < rate} or {rng.choice(matches).start()}
+
+    def change(match: re.Match) -> str:
+        if match.start() not in chosen:
+            return match.group()
+        options = table[match.group().lower()]
+        return options if isinstance(options, str) else rng.choice(options)
+
+    return WORD.sub(change, text)
+
+
+def shorthand(text: str, rng: Random) -> str:
+    return _on_listed_words(text, rng, SHORTHAND, rate=0.7)
+
+
+def emoji_word(text: str, rng: Random) -> str:
+    return _on_listed_words(text, rng, EMOJI_WORDS, rate=0.7)
+
+
+def _typo(word: str, rng: Random) -> str:
+    """One slip of the fingers: two letters swapped, one doubled, dropped, or a neighbouring key."""
+    spot = rng.randint(1, len(word) - 2)
+    kind = rng.choice(("swap", "swap", "double", "drop", "neighbour"))
+    if kind == "swap":
+        return word[:spot] + word[spot + 1] + word[spot] + word[spot + 2 :]
+    if kind == "double":
+        return word[:spot] + word[spot] + word[spot:]
+    if kind == "drop":
+        return word[:spot] + word[spot + 1 :]
+    for row in KEYBOARD_ROWS:
+        at = row.find(word[spot].lower())
+        if at >= 0:
+            return word[:spot] + row[at - 1 if at else 1] + word[spot + 1 :]
+    return word
+
+
+def misspelling(text: str, rng: Random) -> str:
+    def change(word: str) -> str:
+        if word.lower() in COMMON_MISSPELLINGS:
+            return COMMON_MISSPELLINGS[word.lower()]
+        return _typo(word, rng) if len(word) >= 5 and word.islower() else word
+
+    listed = [m for m in WORD.finditer(text) if m.group().lower() in COMMON_MISSPELLINGS]
+    if listed and rng.random() < 0.5:
+        return _on_listed_words(text, rng, COMMON_MISSPELLINGS, rate=0.7)
+    return _on_some_words(text, rng, change, rate=0.2, min_len=5)
+
+
 TRICKS: dict[str, Callable[[str, Random], str]] = {
     "zero-width": zero_width,
     "styled-alphabet": styled_alphabet,
@@ -278,6 +373,9 @@ TRICKS: dict[str, Callable[[str, Random], str]] = {
     "leetspeak": leetspeak,
     "separator": separator,
     "repeated-chars": repeated_chars,
+    "shorthand": shorthand,
+    "misspelling": misspelling,
+    "emoji-word": emoji_word,
 }
 
 # Layered recipes, outermost trick first. The innermost is applied first.
