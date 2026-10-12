@@ -9,7 +9,9 @@ from deobfuscate.transforms.invisible import TagCharacters, ZeroWidth
 from deobfuscate.transforms.leet import Leetspeak
 from deobfuscate.transforms.lookalike import Lookalike
 from deobfuscate.transforms.marks import CombiningMarks
+from deobfuscate.transforms.repeated import RepeatedChars
 from deobfuscate.transforms.reverse import Reverse
+from deobfuscate.transforms.separator import Separator
 from deobfuscate.transforms.styled import Fullwidth, StyledAlphabet
 
 ALL: tuple[Transform, ...] = (
@@ -22,6 +24,8 @@ ALL: tuple[Transform, ...] = (
     BackslashEscape(),
     CombiningMarks(),
     Leetspeak(),
+    Separator(),
+    RepeatedChars(),
     Lookalike("homoglyph"),
     Lookalike("accent-substitution"),
     Lookalike("homoglyph", level="aggressive", loose=True),

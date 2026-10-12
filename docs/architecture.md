@@ -72,6 +72,8 @@ The values were set while building the transforms and still need a proper tuning
 | `homoglyph`, `accent-substitution` | `lookalike.py` | no | Balanced and up. Decided word by word; rules below |
 | `combining-marks` | `marks.py` | no | Balanced and up. Decided word by word; rules below |
 | `leetspeak` | `leet.py` | no | Balanced and up. Decided token by token; rules below |
+| `separator` | `separator.py` | no | Balanced and up. Decided run by run; rules below |
+| `repeated-chars` | `repeated.py` | no | Aggressive only. Decided word by word; rules below |
 | `base64` | `base64.py` | yes | Both alphabets; reported as `base64` |
 | `hex`, `binary`, `decimal-codes` | `bytes.py` | yes | Must decode to readable UTF-8 |
 | `rot13`, `caesar` | `caesar.py` | yes | Whole text, or runs of words that are not English as they stand |
@@ -165,8 +167,33 @@ gets a capital. Elsewhere a capital hidden behind a digit cannot be recovered (`
 `lookalike.py` asks `leet.py` when a word is joined to digits, so `аcc0unt` with a Cyrillic `а`
 is recognised although neither transform alone sees a known word.
 
+## Separators
+
+`separator.py` joins single letters that have the same character between them: a space, or one
+of `. - _ * ,`. Letters are joined only when they then spell known words.
+
+| Run | Joined when |
+|---|---|
+| Three or more letters with a symbol between them, spelling a known word (`c.l.i.c.k`) | Always |
+| The same, all capitals (`W.H.O`), or dotted with a dot after it too (`a.k.a.`) | Another run in the text was joined outright |
+| The same, not a known word, four letters or more (a name) | One other run for `_` and `*`, two for `. - ,` |
+| Four or more letters with single spaces, splitting into known words (`f r e e g i f t`) | Always; all capitals only with another run |
+| A whole text of single characters with wider gaps between words | Half its letters fall in known words, three words or more, and it is not all capitals |
+
+A word known only in capitals (`USA`) is an abbreviation and never counts as a known word here.
+Spaced-out capitals are left alone because headings are set that way (`C H A P T E R   O N E`).
+
+## Repeated letters
+
+`repeated.py` runs only at `aggressive`. A run of three or more of the same letter is cut to two
+or to one, whichever spells a known word of three letters or more; if both do (`theee`), the
+reading with the commoner letter pattern in the four-gram table wins. People stretch words for
+effect (`Hmmm`, `sooooo`), mostly one short word at a time, so a word shorter than five letters
+is cut back only when another word in the text is stretched too. A word that is not known
+either way (a name) needs two others.
+
 ## State on 2026-10-12
 
-Eighteen transforms exist: the fourteen at `conservative`, plus `homoglyph`,
-`accent-substitution`, `combining-marks` and `leetspeak`. Not built yet: `separator`,
-`repeated-chars`.
+All twenty transforms exist: the fourteen at `conservative`; `homoglyph`,
+`accent-substitution`, `combining-marks`, `leetspeak` and `separator` at `balanced`; and
+`repeated-chars` at `aggressive`. Phase 3 is complete apart from the gaps listed in `PLAN.md`.

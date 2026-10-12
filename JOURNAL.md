@@ -521,6 +521,25 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Known limit:** a capital hidden behind a digit is not recoverable except at the start of a
   sentence or for a word known only as a name.
 
+### 2026-10-12 — Separators and repeated letters; Phase 3 transforms complete (decided by Claude)
+- **Separators:** decided by the transform, run by run; letters are joined only when they spell
+  known words. Rule table in `docs/architecture.md`.
+  - The first version changed 4 clean texts: `a.k.a.` and `a.s.a.p.` (in the word list as "aka"
+    and "asap"), and two spaced-out headings in capitals. Dotted runs followed by a dot, and all
+    capitals, now need another run in the text as evidence; a whole spaced-out text in capitals
+    is left alone. Clean set back to 1 of 7,442.
+  - **Cost accepted:** spaced-out spam written wholly in capitals is not recovered.
+- **Repeated letters (`aggressive` only):** a run of three or more is cut to two or one,
+  whichever is a known word; the four-gram table picks between two valid readings (`theee` is
+  "the", not "thee").
+  - **Tried:** rewriting every stretched word: 88% recovered but 26 to 40 clean texts changed,
+    nearly all emphasis in text messages (`Hmmm`, `sooooo`). Requiring two stretched words in
+    every case: 12 clean texts changed but only 20% recovered inside clean text.
+  - **Chosen:** a lone stretched word is cut back only if the result has five letters or more.
+    12 clean texts changed (3 more than before); 86.7% whole text, 68.3% inside clean text.
+- **Result on dev:** clean texts changed 1, 1 and 12 of 7,442; all obfuscated samples 95.5%,
+  87.7% and 90.9% at the three levels; real phishing set 81.1% and 89.5%; hand-disguised 7 of 25.
+
 ## Open questions
 
 None needing an answer from the user.

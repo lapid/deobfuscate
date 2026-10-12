@@ -13,16 +13,17 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
 ## Current status (updated 2026-10-12)
 
 - **Done:** scope and decisions (Phase 0), research (Phase 0.5), evaluation harness (Phase 1),
-  core engine and scorer (Phase 2), and two of three groups of Phase 3.
-- **Phase 3 so far:** eighteen transforms. The fourteen that run at `conservative` (invisible
+  core engine and scorer (Phase 2), and all the transforms of Phase 3.
+- **Phase 3:** twenty transforms. The fourteen that run at `conservative` (invisible
   characters, hidden text, styled and fullwidth letters, HTML, URL and backslash escapes, base64,
   hex, binary, decimal codes, rot13, Caesar shifts, reversal), plus `homoglyph`,
-  `accent-substitution`, `combining-marks` and `leetspeak` at `balanced`, with a looser
-  lookalike variant at `aggressive`.
-- **Next:** the rest of the third group: `separator`, then `repeated-chars`. Then Phase 4 (tune the presets, error analysis, final run on test),
-  Phase 5, Phase 6.
-- **Numbers on dev:** clean texts changed 1, 1 and 9 of 7,442 at the three levels; recovery
-  95.5% at `conservative`; all obfuscated samples 85.4% at `balanced`; real phishing set 81.1% at `balanced` and
+  `accent-substitution`, `combining-marks`, `leetspeak` and `separator` at `balanced`, and a
+  looser lookalike variant and `repeated-chars` at `aggressive`. Gaps left open are unticked in
+  `PLAN.md`.
+- **Next:** Phase 4 (tune the presets, error analysis, final run on test), when the owner starts
+  it. Then Phase 5, Phase 6.
+- **Numbers on dev:** clean texts changed 1, 1 and 12 of 7,442 at the three levels; recovery
+  95.5% at `conservative`, 87.7% at `balanced`, 90.9% at `aggressive`; real phishing set 81.1% at `balanced` and
   89.5% at `aggressive`.
   Full table in `docs/evaluation.md`.
 - **Known problems:** a lone disguised word with everyday accents, or a lone Greek "a", is left

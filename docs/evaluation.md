@@ -103,23 +103,27 @@ The deobfuscator itself has no transforms yet and scores the same as "return the
 
 ## Current results on the dev split (2026-10-12)
 
-Eighteen transforms: the fourteen `conservative` ones, plus lookalike letters, accent
-substitution, combining marks and leetspeak. The test split has not been run.
+All twenty transforms are built. The test split has not been run.
 
 | Scored at | Clean texts changed | Recovered exactly | Made worse | Real phishing set |
 |---|---|---|---|---|
 | conservative | 0.01% (1/7442) | 95.5% (3461/3625) | 0.1% (2/3625) | not at this level |
-| balanced | 0.01% (1/7442) | 85.4% (6918/8099) | 0.0% (3/8099) | 81.1% (2433/3000) |
-| aggressive | 0.12% (9/7442) | 86.6% (7197/8309) | 0.0% (2/8309) | 89.5% (2684/3000) |
+| balanced | 0.01% (1/7442) | 87.7% (7101/8099) | 0.0% (3/8099) | 81.1% (2433/3000) |
+| aggressive | 0.16% (12/7442) | 90.9% (7549/8309) | 0.0% (4/8309) | 89.5% (2684/3000) |
 
 On the real phishing set the mean character error falls from 20.4% to 1.5% at `balanced` and to
 0.6% at `aggressive`: most sentences that are not recovered exactly are one or two letters off.
 
 At `balanced`, whole text: homoglyph 93.3%, accent substitution 73.8%, combining marks 96.7%,
-leetspeak 76.0% (86.7% inside clean text). Layered with leetspeak: 60% to 76%.
+leetspeak 76.0% (86.7% inside clean text), separators 87.3% (85.0% inside clean text). Layered
+with leetspeak: 60% to 76%. At `aggressive`, repeated letters 86.7% (68.3% inside clean text).
 
-`balanced` and `aggressive` are still held down by the two tricks with no transform yet
-(separators, repeated characters). The hand-disguised set is at 6 of 25.
+The hand-disguised set is at 7 of 25. What remains there is mostly outside what version 1
+attempts: misspellings, emoji for words, shorthand, heavy symbol art, and letters with no entry
+in our lookalike tables.
+
+The 12 clean texts changed at `aggressive` are 8 correct foreign spellings (`coupé`), 3
+texts with a stretched word (`Helloooo`) and the HTML sentence.
 
 Most of the rise since 2026-10-09 (phishing set 57.1% to 81.0% at `balanced`) came from one
 engine change, not from a new rule: all proposals of a certain transform are now applied in one
@@ -131,6 +135,8 @@ real text messages with HTML entities 100% (136/136). By length: under 20 charac
 
 Weak spots:
 
+- **Repeated letters inside clean text: 68%.** One short stretched word is left alone, because
+  that is what emphasis looks like.
 - **Leetspeak, whole text: 76%.** Most misses are a capital letter hidden behind a digit
   (`@rmy` for "Army" comes back as "army") and names that are not in the word list.
 - **Accent substitution inside otherwise clean text: 62%** at `balanced` (whole text 74%). A

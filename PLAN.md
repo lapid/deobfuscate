@@ -166,8 +166,11 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
   - [x] Leetspeak: only when the result is a known word; never on shorthand (`transforms/leet.py`;
         dev 76% whole text, 87% inside clean text)
   - [ ] Leetspeak gaps: capitals hidden behind a digit, names, layered with homoglyphs (60%)
-  - [ ] Separator insertion (`s p a c e d`, `s.p.l.i.t`)
-  - [ ] Repeated characters (`heeellooo`)
+  - [x] Separator insertion (`s p a c e d`, `s.p.l.i.t`) (`transforms/separator.py`; dev 87%)
+  - [x] Repeated characters (`heeellooo`), `aggressive` only (`transforms/repeated.py`; dev 87%
+        whole text, 68% inside clean text)
+  - [ ] Separator gaps: letters split off inside a hyphenated word (`sub-o-r-b-i-t-a-l`), spaced
+        text in capitals, two words joined by a symbol (`simple_trick`)
 
 ## Phase 4 — Error analysis loop
 

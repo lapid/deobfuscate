@@ -170,6 +170,51 @@ class LeetspeakTest(unittest.TestCase):
         self.assertEqual(result.text, "It was gr8, thx 4ever, the code word is next")
 
 
+class SeparatorTest(unittest.TestCase):
+    def test_symbols_between_letters(self):
+        for symbol in ".-_*,":
+            text = f"Please {symbol.join('send')} the {symbol.join('report')} today"
+            result = run(text, "balanced")
+            self.assertEqual(result.text, "Please send the report today", symbol)
+            self.assertEqual({step.transform for step in result.steps}, {"separator"})
+            self.assertEqual(run(text).text, text)
+
+    def test_spaced_letters(self):
+        self.assertEqual(run("Get a f r e e g i f t now", "balanced").text, "Get a free gift now")
+        self.assertEqual(
+            run("t h e   m e e t i n g   i s   m o v e d", "balanced").text, "the meeting is moved"
+        )
+
+    def test_initials_abbreviations_and_headings_stay(self):
+        for text in (
+            "J. R. R. Tolkien and C. S. Lewis",
+            "The U.S.A and the W.H.O met at 5 p.m., i.e. late.",
+            "N.B. the R.S.V.P. date is a.s.a.p. or a.k.a. now.",
+            "C H A P T E R   O N E",
+            "W E L C O M E",
+            "Options a b c d and x-y-z, or one_two_three.",
+            "T-shirt, X-ray, U-turn and e-mail",
+        ):
+            for level in ("balanced", "aggressive"):
+                self.assertEqual(run(text, level).text, text, (level, text))
+
+
+class RepeatedCharsTest(unittest.TestCase):
+    def test_stretched_words(self):
+        text = "Pleeease seeend the repoooort befoooore Friiiiday"
+        result = run(text, "aggressive")
+        self.assertEqual(result.text, "Please send the report before Friday")
+        self.assertEqual({step.transform for step in result.steps}, {"repeated-chars"})
+        self.assertEqual(run(text, "balanced").text, text)
+
+    def test_the_commoner_reading_wins(self):
+        self.assertEqual(run("Seeend theee files nooow", "aggressive").text, "Send the files now")
+
+    def test_one_short_stretched_word_is_emphasis(self):
+        for text in ("Hmmm, that is odd.", "It was sooooo good.", "Yessss we won", "See www.example.com or page III"):
+            self.assertEqual(run(text, "aggressive").text, text)
+
+
 class LeaveAloneTest(unittest.TestCase):
     def untouched(self, *texts: str) -> None:
         for level in ("conservative", "balanced"):
