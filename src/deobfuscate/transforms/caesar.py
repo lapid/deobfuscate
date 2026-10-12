@@ -72,6 +72,11 @@ class Caesar(Transform):
                 else:
                     start, end = found[first].start, found[last].end
                 span = text[start:end].translate(moved)
+                letters = [char for char in span if char.isalpha()]
+                if sum(not char.isascii() for char in letters) * 10 > len(letters):
+                    # Shifting moves plain letters only. A phrase full of accented letters
+                    # is another language ("Quánguó Nánzǐ"), not shifted English.
+                    continue
                 covered, total = scorer.word_coverage(span)
                 if total and covered / total >= 0.6:
                     yield Candidate(start, end, span)

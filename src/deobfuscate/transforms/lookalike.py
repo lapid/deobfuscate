@@ -17,7 +17,12 @@ from deobfuscate.transforms.base import Candidate, Transform
 from deobfuscate.transforms.leet import read as read_leet
 
 # Letters of any alphabet, with apostrophes allowed inside.
-WORD = re.compile(r"[^\W\d_]+(?:['’][^\W\d_]+)*")
+# Symbols that stand for a letter only when written inside a word ("¢ard", "confi¡rm").
+SYMBOLS = {"¢": "c", "₫": "d", "∨": "v", "¡": "i"}
+# Letters of any alphabet, with apostrophes allowed inside. "¡" opens a Spanish
+# sentence, so it counts only after a letter.
+WORD = re.compile(r"(?:[^\W\d_]|[¢₫∨]|(?<=[^\W\d_])¡)+(?:['’][^\W\d_]+)*")
+CYRILLIC_VARIANT = re.compile(r"(CYRILLIC (?:SMALL|CAPITAL) LETTER \w+) WITH ")
 LATIN_NAME = re.compile(
     r"LATIN (?:SMALL|CAPITAL) LETTER (?:SCRIPT )?([A-Z])(?: WITH .+)?$|LATIN LETTER SMALL CAPITAL ([A-Z])$"
 )
@@ -30,6 +35,14 @@ LOOSE = {
     "џ": "u", "Ա": "u", "м": "m", "т": "t", "г": "r", "ш": "w", "ρ": "p", "ν": "v", "χ": "x", "ε": "e", "σ": "o",
     "ᴦ": "r",
 }
+# Letters seen standing for more than one plain letter, or for another one than
+# Unicode lists. Found in the dev half of the hand-disguised sentences. The first
+# reading that gives a known word is used.
+SEVERAL = {
+    "þ": "pb", "ϸ": "pb", "ɕ": "cg", "ө": "eo", "ԑ": "se", "ғ": "fr", "ſ": "fs", "ϱ": "pe",
+    "ƅ": "b", "ϝ": "f", "ϵ": "e", "ς": "c", "ϛ": "c", "ɥ": "u", "ʘ": "o", "µ": "u",
+    "ե": "t", "ր": "n", "թ": "p", "և": "u", "Ւ": "t", "υ": "uv",
+}
 # Unicode files every upright stroke under "l". Which letter is meant depends on the word.
 STROKES = frozenset("lIi")
 MAX_READINGS = 32
@@ -41,6 +54,14 @@ def readings(char: str) -> tuple[list[str], str] | None:
     None if it has no plain reading.
     """
     base = unicodedata.normalize("NFD", char)[0]
+    if char in SYMBOLS:
+        return [SYMBOLS[char]], "foreign"
+    if several := SEVERAL.get(base):
+        return list(several), "accent" if script_of(base) == "Latin" else "foreign"
+    if unicodedata.category(char) == "Nl":
+        # Roman numerals that have their own character: "ⅼ", "ⅴ", "ⅿ".
+        folded = unicodedata.normalize("NFKC", char)
+        return ([folded], "foreign") if len(folded) == 1 and folded.isascii() else None
     if base.isascii():
         found, kind = (base, "accent") if base.isalpha() else (None, "")
     else:
@@ -48,6 +69,10 @@ def readings(char: str) -> tuple[list[str], str] | None:
         found = strict.get(char) or strict.get(base) or LOOSE.get(char) or LOOSE.get(base)
         if found is None and (named := LATIN_NAME.match(unicodedata.name(base, ""))):
             found = (named.group(1) or named.group(2)).lower()
+        if found is None and (variant := CYRILLIC_VARIANT.match(unicodedata.name(base, ""))):
+            # "ӷ", "ҫ", "ҟ": a Cyrillic letter with a hook or stroke reads as the letter without.
+            without = readings(unicodedata.lookup(variant.group(1)))
+            found = without[0][0].lower() if without else None
         if found == "rn":
             found = "m"
         kind = "accent" if script_of(base) == "Latin" else "foreign"
@@ -77,6 +102,8 @@ class Reading:
     # Its accents are ones English and its neighbours do not use (as in "yōũr"),
     # sitting on plain letters. Such a word is suspicious on its own.
     odd_accents: bool
+    # It uses a symbol or a Roman numeral for a letter. Only a known word is rewritten.
+    symbols: bool = False
 
 
 # What may sit next to the word inside one leetspeak token.
@@ -115,7 +142,7 @@ def read_word(match: re.Match) -> Reading | None:
     options: list[list[str]] = []
     kinds: set[str] = set()
     for char in word:
-        if char.isascii():
+        if char.isascii() or char == "’":
             options.append([char])
             continue
         found = readings(char)
@@ -124,6 +151,13 @@ def read_word(match: re.Match) -> Reading | None:
         options.append(found[0])
         kinds.add(found[1])
     if not kinds:
+        return None
+    if word[0] == "µ":
+        # The unit prefix: "µm", "µg".
+        return None
+    symbols = [char for char in word if char in SYMBOLS or unicodedata.category(char) == "Nl"]
+    if symbols and len(word) - len(symbols) < 2:
+        # A real Roman numeral, or a currency sign beside a letter.
         return None
     plain = "".join(choice[0] for choice in options)
     known = False
@@ -138,6 +172,7 @@ def read_word(match: re.Match) -> Reading | None:
         match.start(), match.end(), plain, known, "foreign" in kinds,
         all(not char.isascii() and script_of(unicodedata.normalize("NFD", char)[0]) != "Latin" for char in letters),
         all(unicodedata.normalize("NFD", char)[0].isascii() for char in word) and any(ord(char) > 0xFF for char in word),
+        bool(symbols),
     )
 
 
@@ -172,7 +207,10 @@ def decide(text: str, loose: bool = False) -> list[tuple[Reading, str]]:
     # The loose rules act on less evidence, so they ask for more English around it.
     needed = 0.7 if loose else 0.5
     english = sum(scorer.is_word(word) for word in multi)
-    if multi and english < len(multi) * needed:
+    # Disguised words that read as English count too; a text may have few plain words left.
+    readable = [reading for reading, word in found if len(word) > 1]
+    english += sum(reading.known for reading in readable)
+    if multi and english < (len(multi) + len(readable)) * needed:
         return decide(text) if loose else []
 
     def strong(item: tuple[Reading, str]) -> bool:
@@ -183,6 +221,7 @@ def decide(text: str, loose: bool = False) -> list[tuple[Reading, str]]:
     odd_accent_evidence = sum(
         strong(item) and not item[0].foreign and item[0].odd_accents and item[1][0].islower() for item in found
     )
+    # Capitalised words are left out: two Vietnamese names ("Trần", "Hồ") read as English words.
     evidence = foreign_evidence + odd_accent_evidence
     # A text in another language has words in its alphabet that have no English reading.
     another_language = unreadable_foreign >= max(1, foreign_evidence)
@@ -209,6 +248,8 @@ def decide(text: str, loose: bool = False) -> list[tuple[Reading, str]]:
             else:
                 ok = evidence >= 3
             name = "accent-substitution"
+        if reading.symbols and not reading.known:
+            ok = False
         if ok and reading.plain != word:
             out.append((reading, name))
     return out
@@ -217,6 +258,8 @@ def decide(text: str, loose: bool = False) -> list[tuple[Reading, str]]:
 class Lookalike(Transform):
     # The decision is made here, word by word; the scorer has nothing to add for one word.
     judged = False
+    # Both tricks are decided together, each word counting as evidence for the others.
+    group = "lookalike"
 
     def __init__(self, name: str, level: str = "balanced", loose: bool = False) -> None:
         self.name = name

@@ -47,8 +47,8 @@ Every result is also reported by origin, so a problem confined to one kind of te
 by the project owner: 25 in dev, 22 in test, MIT-licensed. They are built from
 `data/human/to_disguise.txt` by `uv run python -m evaluation.human` and split by sentence number.
 The tricks are not labelled and the samples count from `balanced` up. Several use disguises that
-are out of scope (misspelling, shorthand, emoji), so read the character error for this origin
-rather than exact recovery. With so few samples, one sentence is 4 points.
+are out of scope or covered only narrowly (misspelling, shorthand, emoji, symbol pictures), so
+read the character error for this origin as well as exact recovery. With so few samples, one sentence is 4 points.
 
 ### Local-only real-world set
 
@@ -108,75 +108,147 @@ texts in the `symbols` category, which is why the tool does not normalise whole 
 
 The deobfuscator itself has no transforms yet and scores the same as "return the input".
 
-## Current results on the dev split (2026-10-12)
+## Current results on the dev split (2026-10-12, after the Phase 4 error analysis and sweep)
 
-All twenty-three transforms are built. The test split has not been run. Recovery ignores capital
-letters (see "The measures").
+All twenty-three transforms are built and the thresholds are chosen. The test split has not been
+run. Recovery ignores capital letters (see "The measures").
 
-| Scored at | Clean texts changed | Recovered | With every capital right | Made worse | Real phishing set |
-|---|---|---|---|---|---|
-| conservative | 0.01% (1/7442) | 95.5% (3461/3625) | 95.5% | 0.1% (2/3625) | not at this level |
-| balanced | 0.01% (1/7442) | 88.0% (7124/8099) | 87.7% | 0.0% (3/8099) | 81.1% (2433/3000) |
-| aggressive | 0.35% (26/7442) | 87.9% (7855/8939) | 87.2% | 0.2% (16/8939) | 89.5% (2684/3000) |
+| Scored at | Clean texts changed | Recovered | With every capital right | Made worse | Real phishing set | Hand-disguised |
+|---|---|---|---|---|---|---|
+| conservative | 0.01% (1/7442) | 96.1% (3482/3625) | 96.1% | 0.1% (2/3625) | not at this level | not at this level |
+| balanced | 0.01% (1/7442) | 92.3% (7474/8099) | 92.0% | 0.0% (2/8099) | 90.8% (2725/3000) | 15 of 25 |
+| aggressive | 0.32% (24/7442) | 90.0% (8046/8939) | 89.3% | 0.2% (17/8939) | 94.5% (2834/3000) | 17 of 25 |
 
-The `aggressive` row covers 840 more samples than before (the three informal-writing tricks),
-which is why its recovery is lower than the 91% reported earlier the same day; on the samples it
-shared with that run nothing was lost.
+Before Phase 4 the same table read: recovered 95.5%, 88.0% and 87.9%; real phishing set 81.1% and
+89.5%; hand-disguised 7 and 9 of 25; clean texts changed 1, 1 and 26.
 
-On the real phishing set the mean character error falls from 20.4% to 1.5% at `balanced` and to
-0.6% at `aggressive`.
+On the real phishing set the mean character error falls from 20.4% to 0.6% at `balanced` and to
+0.1% at `aggressive`.
 
 By trick, whole text and inside clean text:
 
 | Trick | Level | Whole text | Inside clean text |
 |---|---|---|---|
-| homoglyph | balanced | 93.3% | 91.7% |
-| accent substitution | balanced | 73.8% | 61.7% |
+| homoglyph | balanced | 94.7% | 93.3% |
+| accent substitution | balanced | 76.5% | 61.7% |
 | combining marks | balanced | 96.7% | 98.3% |
-| leetspeak | balanced | 84.7% | 90.0% |
+| leetspeak | balanced | 86.7% | 90.0% |
 | separators | balanced | 87.3% | 85.0% |
+| reversal | conservative | 95.3% | 41.7% |
+| Caesar shift | conservative | 96.0% | 65.0% |
+| rot13 | conservative | 94.7% | 68.3% |
 | repeated letters | aggressive | 86.7% | 68.3% |
 | misspelling | aggressive | 54.0% | 50.0% |
 | emoji for a word | aggressive | 50.7% | 56.7% |
 | shorthand | aggressive | 24.0% | 38.3% |
 
+Every other encoding is at 95% or more in both columns.
+
+At `conservative`, by kind of sample: whole text 98.4%, part of a text 89.9%, two layers 94.8%,
+real text messages with HTML entities 100% (136/136). By length: under 20 characters 85.5%,
+20 and over 95.6% to 97.1%.
+
 The three informal-writing rows are low on purpose-built hard samples: the generator has its own,
 longer lists and makes random typing slips, and a text counts only if every word comes back. Their
 step precision is 94% to 100%. On the 1,518 clean informal texts (mostly real text messages),
-`aggressive` rewrites 25.4%; a reading of the commonest rewrites found them correct (`u` to
-"you" 219 times, `dont` to "don't" 32 times) with a few wrong ones, since fixed.
+`aggressive` rewrites 25.4%.
 
-The 26 clean texts changed at `aggressive`: 8 correct foreign spellings (`coupé`), 3 with a
-stretched word, the HTML sentence, and 14 from the informal-writing transforms. Of those 14, 11
-are real typos in Stack Exchange posts being corrected (`accross`, `avaliable`, `doesnt`) and 3
-are the old spelling `waggon` in a book.
+The 24 clean texts changed at `aggressive`:
 
-The hand-disguised set is at 7 of 25 at `balanced` and 9 of 25 at `aggressive`.
+- 12 by `misspelling`: 10 real typos in Stack Exchange and Wikinews posts being corrected
+  (`accross`, `avaliable`, `doesnt`) and 2 with the old spelling `waggon` in a book.
+- 2 by `shorthand` in Wikipedia text that quotes it (`u`, `R U`).
+- 3 with a stretched word (`Helloooo`).
+- 5 correct foreign spellings read as accent disguises (`coupé`, `façade`, `sław`), and a lone
+  Cyrillic "а" in a sentence about that letter.
+- The HTML sentence.
 
-At `conservative`, by kind of sample: whole text 98.2%, part of a text 87.9%, two layers 94.8%,
-real text messages with HTML entities 100% (136/136). By length: under 20 characters 80.3%,
-20 and over 95% to 97%.
+A 25th, a pinyin phrase rewritten by a Caesar shift, was found in this reading and fixed.
+
+### Hand-disguised sentences: what the ten failures are
+
+At `balanced`:
+
+- Two are written in symbol pictures (`|-|` for "H"). Not attempted in version 1.
+- Two need spelling correction beyond the short lists (`kongratulations`, `pirze`, `gol`, `bes`).
+- Two use `l` for `i` in plain letters (`vlslt`, `lt`), which no transform reads; one of them
+  also has stray commas and a colon added between words.
+- One has `4` for "for" before a word outside the shorthand list, and `_` between two words.
+- One uses an emoji for a word that cannot be guessed (a sparkle for "wonderful").
+- Two use shorthand or an emoji that only `aggressive` reads (`ur`, a pill for "medicine");
+  both come back at that level.
+
+### Threshold sweep (2026-10-12)
+
+One threshold varied at a time around the starting values, on the dev split, before the last
+lookalike and reversal fixes. Each cell: clean texts changed / recovered / made worse.
+
+| Level | Setting | Values tried and result |
+|---|---|---|
+| conservative (3,625 samples) | `min_score` | 0.40: 2 / 3467 / 2 · 0.45: 2 / 3465 / 2 · **0.50: 1 / 3461 / 2** · 0.55: 1 / 3452 / 2 · 0.60: 1 / 3439 / 2 |
+| | `min_gain` | 0.15: 1 / 3462 / 2 · 0.20: 1 / 3462 / 2 · 0.25: 1 / 3461 / 2 · **0.30: 1 / 3461 / 2** · 0.35: 1 / 3458 / 2 · 0.40: 1 / 3457 / 2 |
+| | `min_letters` | 6: 1 / 3474 / 2 · **8: 1 / 3474 / 2** · 10: 1 / 3461 / 2 · 12: 1 / 3425 / 2 · 14: 1 / 3362 / 1 |
+| balanced (8,099 samples) | `min_score` | 0.40: 2 / 7393 / 4 · 0.45: 2 / 7390 / 4 · **0.50: 1 / 7386 / 3** · 0.55: 1 / 7377 / 2 · 0.60: 1 / 7364 / 2 |
+| | `min_gain` | 0.15: 1 / 7389 / 3 · 0.20: 1 / 7389 / 3 · 0.25: 1 / 7388 / 3 · **0.30: 1 / 7386 / 3** · 0.35: 1 / 7383 / 3 · 0.40: 1 / 7382 / 2 |
+| | `min_letters` | 6: 1 / 7399 / 3 · **8: 1 / 7399 / 3** · 10: 1 / 7386 / 3 · 12: 1 / 7350 / 3 · 14: 1 / 7287 / 2 |
+| aggressive (8,939 samples) | `min_score` | 0.40: 26 / 7973 / 16 · **0.45: 26 / 7970 / 16** · 0.50: 25 / 7966 / 16 · 0.55: 25 / 7957 / 16 |
+| | `min_gain` | 0.15: 26 / 7971 / 16 · 0.20: 26 / 7971 / 16 · **0.25: 26 / 7970 / 16** · 0.30: 26 / 7970 / 16 · 0.35: 26 / 7967 / 16 |
+| | `min_letters` | 4: 26 / 7973 / 16 · **6: 26 / 7970 / 16** · 8: 26 / 7970 / 16 · 10: 26 / 7957 / 16 |
+
+Chosen values are in bold. What the sweep shows:
+
+- **The results barely depend on the thresholds.** Across the whole range recovery moves by
+  about one point. The word-level rules and the guards do the deciding, not the margins.
+- **`min_score` stays at 0.50** below `aggressive`: lower values change one more clean text.
+- **`min_gain` stays** where it was: nothing to gain either way.
+- **`min_letters` goes from 10 to 8** at `conservative` and `balanced`: 13 more samples
+  recovered at each level, no clean text changed, nothing made worse. 6 adds nothing over 8.
+- `aggressive` is unchanged. At 0.50 it would change one clean text fewer and recover four
+  fewer; it keeps the lower margin, which is what the level is for.
+
+Per-transform limits, tried the same way with the chosen thresholds in place:
+
+| Limit | Values tried: clean changed / recovered | Kept |
+|---|---|---|
+| `reverse` fewest letters | 8: 2 / 3480 · 10: 1 / 3481 · 12: 1 / 3481 | 10 |
+| `caesar` fewest letters | 8: 2 / 3481 · 10: 1 / 3481 · 12: 1 / 3470 | 10 |
+| `leetspeak` words of evidence before a name is read | 2: 1 / 7473 · 3: 1 / 7461 · 4: 1 / 7453 | 2 (was 3) |
+| `leetspeak` words of evidence before a short token is read | 1: 1 / 7461 · 2: 1 / 7452 | 1 |
+| `repeated-chars` shortest lone word | 4: 26 / 8042 · 5: 25 / 8033 · 6: 24 / 8020 | 5 |
+| `repeated-chars` words of evidence before a name is cut | 1: 25 / 8034 · 2: 25 / 8033 · 3: 25 / 8029 | 2 |
+| `misspelling` shortest word for a typing slip | 5: 26 / 8059 · 6: 25 / 8033 · 7: 24 / 8020 | 6 |
+
+Not swept: the `separator` evidence counts (a table per symbol, not one number) and the
+shorthand tiers.
 
 Weak spots:
 
+- **The clean set constrains the thresholds weakly.** Only one clean text changes anywhere in
+  the swept range below `aggressive`, so the sweep cannot show where clean text starts to
+  suffer. A short Spanish sentence, "No pasa nada", is reversed at every level because all three
+  words read as English backwards ("Adan", "asap", "on"); nothing in the clean set is like it.
 - **Shorthand, misspellings and emoji are covered narrowly by design**: forms outside the short
   lists, uncommon misspellings and dropped letters are left as written.
-- **The informal-writing samples share an author with the transforms.** The generator's lists
-  are separate and longer, but they were written by the same hand, so these numbers flatter the
-  tool less than real data would only by accident. The text-message corpus is the better check.
+- **The informal-writing samples share an author with the transforms.** The text-message corpus
+  is the better check.
+- **Some lookalike readings were learned from the 25 hand-disguised dev sentences** (about
+  twenty letters such as `ƅ` for "b" and Armenian `ր` for "n"). The 22 test sentences will show
+  whether they carry over; the dev figure of 15 of 25 flatters the tool.
+- **Accent substitution inside otherwise clean text: 62%** at `balanced` (whole text 77%). A
+  single word with everyday accents, or a capitalised name, is left alone without more evidence.
+  Letting two capitalised words count as evidence was tried and changed two Vietnamese names in
+  a clean text, so it was dropped.
+- **Shifted or reversed words inside otherwise clean text:** Caesar 65%, rot13 68%, reversal 42%
+  (was 28%). A short run has too few letters to judge, and words at its ends that read both
+  ways ("no", "was") cannot be placed.
 - **Repeated letters inside clean text: 68%.** One short stretched word is left alone, because
   that is what emphasis looks like.
-- **Leetspeak, whole text: 76%.** Most misses are a capital letter hidden behind a digit
-  (`@rmy` for "Army" comes back as "army") and names that are not in the word list.
-- **Accent substitution inside otherwise clean text: 62%** at `balanced` (whole text 74%). A
-  single word with everyday accents, or a name, is left alone without more evidence.
-- Shifted or reversed words inside otherwise clean text: Caesar 65%, rot13 68%, reversal 28%.
+- **Leetspeak with a second trick on top: 64% to 82%.** Most misses are a capital letter hidden
+  behind a digit and names that are not in the word list.
 - Reversed base64: 66%.
-- Texts under 20 characters: too little evidence to judge.
+- Texts under 20 characters: 82% to 87%.
 - The one clean text changed at `conservative` and `balanced` is a sentence that mentions HTML
   entities ("write `&amp;` to show an ampersand").
-- The 8 extra clean texts changed at `aggressive` are correct foreign spellings read as
-  disguises (`coupé`, `françoise`, `crème`).
 
 ## Known limits
 

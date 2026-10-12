@@ -47,9 +47,9 @@ COUNTED = frozenset(
 )
 
 
-def like(token: str, plain: str) -> str:
-    """``plain`` in the capitals of ``token``."""
-    if token.isupper() and len(token) > 1:
+def like(token: str, plain: str, shouting: bool = False) -> str:
+    """``plain`` in the capitals of ``token``; all capitals only if the whole text is."""
+    if token.isupper() and len(token) > 1 and shouting:
         return plain.upper()
     return plain.capitalize() if token[0].isupper() else plain
 
@@ -73,14 +73,14 @@ class Shorthand(Transform):
             before = tokens[index - 1].group() if index else ""
             after = tokens[index + 1].group() if index + 1 < len(tokens) else ""
             if lower in ALWAYS or (lower in CAPITALS_ONLY and token.isupper()):
-                candidate = Candidate(match.start(), match.end(), like(token, (ALWAYS | CAPITALS_ONLY)[lower]))
+                candidate = Candidate(match.start(), match.end(), like(token, (ALWAYS | CAPITALS_ONLY)[lower], text.isupper()))
                 # In capitals these are also names and labels: "U Thant", "MSG", "a TXT record".
                 (unsure if token.isupper() else sure).append(candidate)
                 capitals += token.isupper() and len(token) > 1
             elif lower in BESIDE:
                 plain, words = BESIDE[lower]
                 if before.lower() in words or after.lower() in words:
-                    sure.append(Candidate(match.start(), match.end(), like(token, plain)))
+                    sure.append(Candidate(match.start(), match.end(), like(token, plain, text.isupper())))
             elif lower in AFTER_NUMBER:
                 plain, words = AFTER_NUMBER[lower]
                 if before.isdigit() or not (after.islower() or text.isupper()):

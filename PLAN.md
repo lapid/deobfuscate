@@ -176,12 +176,42 @@ Run the evaluation after each one; keep it only if the clean set stays clean.
   - [ ] Separator gaps: letters split off inside a hyphenated word (`sub-o-r-b-i-t-a-l`), spaced
         text in capitals, two words joined by a symbol (`simple_trick`)
 
-## Phase 4 — Error analysis loop
+## Phase 4 — Error analysis, thresholds, final test run
 
-- [ ] Review the worst dev failures by category after each phase 3 group
-- [ ] Add each real failure as a test case before fixing it
-- [ ] Tune acceptance margins on dev; check the trade-off between false changes and recovery
-- [ ] Final run on the test set and the real-world set
+Started 2026-10-12 on the owner's go-ahead. Order: error analysis first, then thresholds, then
+the test split once.
+
+Error analysis (dev only):
+- [x] Hand-disguised sentences: read every failure, fix the causes that are general
+  (lookalike readings, evidence shared between the two lookalike tricks, `fr33`)
+- [x] Add each real failure as a unit test before fixing it
+- [x] Worst dev failures by trick, from `--detail`: reversed words inside clean text improved
+  (28% to 42%); accent substitution inside clean text tried and left (the fix changed clean text)
+- [x] The clean texts still changed at `aggressive` read one by one (24; list in
+  `docs/evaluation.md`); a Caesar shift of a pinyin phrase fixed
+- [ ] Not attempted, left as known problems: `l` written for `i` (`vlslt`), symbol-picture
+  letters (`|-|`), stretched words and Caesar or rot13 runs inside clean text
+
+Thresholds (dev only):
+- [x] Sweep the three acceptance thresholds of each level (`min_score`, `min_gain`,
+  `min_letters` in `engine.py`), one at a time around the current values; record clean texts
+  changed, recovery and made-worse for every point in `docs/evaluation.md`
+- [x] Choose the values; keep a change only if clean texts changed does not rise
+  (`min_letters` 10 to 8 at `conservative` and `balanced`; the rest unchanged)
+- [x] Check the per-transform limits the same way (`min_letters` of `reverse` and `caesar`,
+  the evidence counts of the word-level transforms); one changed (leetspeak names, 3 to 2)
+- [x] Freeze (2026-10-12): no rule or threshold changes after this point without recording that the test
+  split is no longer unseen
+
+Final test run:
+- [ ] Owner has checked the test half of `data/human/to_disguise.txt` (or agreed to run without)
+- [ ] Owner gives the go-ahead for the run; it is done once
+- [ ] Run `uv run python -m evaluation.run --split test --detail` at the three levels, with the
+  real-world set and the hand-disguised test sentences
+- [ ] Record the test numbers next to the dev numbers in `docs/evaluation.md`, `README.md` and
+  `AGENTS.md`, with the gap between them; compare against the provisional targets
+- [ ] Do not fix anything in response to the test numbers in version 1; list what they show
+  as known problems
 
 ## Phase 5 — Packaging
 

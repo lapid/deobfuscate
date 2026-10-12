@@ -46,6 +46,11 @@ class RecoveryTest(unittest.TestCase):
                 disguised = obfuscator.apply_partial(trick, sentence, random.Random(seed))
                 self.assertEqual(run(disguised).text, sentence, (trick, disguised))
 
+    def test_reversed_run_holding_a_word_that_reads_both_ways(self):
+        # "no" is a word as it stands, in the middle of the reversed run.
+        result = run("The band first " + "debuted on the professional"[::-1] + " music scene in Chicago.")
+        self.assertEqual(result.text, "The band first debuted on the professional music scene in Chicago.")
+
     def test_layers(self):
         for stack in (("base64", "base64"), ("rot13", "base64"), ("hex", "base64"), ("base64", "hex"),
                       ("reverse", "base64"), ("base64", "reverse"), ("url-percent", "html-entity"),
@@ -85,6 +90,26 @@ class LookalikeTest(unittest.TestCase):
         result = run("Please confirm y\u014d\u0169r acc\u014funt today", "balanced")
         self.assertEqual(result.text, "Please confirm your account today")
         self.assertEqual({step.transform for step in result.steps}, {"accent-substitution"})
+
+    def test_both_tricks_in_one_text_count_as_evidence_for_each_other(self):
+        # "Cаll" has a Cyrillic letter, "ȃđđŗess" only accents that also occur in real spelling.
+        result = run("C\u0430ll us and confirm your \u0203\u0111\u0111\u0157ess", "balanced")
+        self.assertEqual(result.text, "Call us and confirm your address")
+        self.assertEqual({step.transform for step in result.steps}, {"homoglyph", "accent-substitution"})
+
+    def test_roman_numerals_variants_and_symbols_inside_words(self):
+        for disguised, plain in (
+            ("the \u217cink to the fi\u217ce fro\u217f the ad\u217fin", "the link to the file from the admin"),
+            ("yo\u03c5\u04f7 \u04abard was deli\u2228e\u0491ed", "your card was delivered"),
+            ("\u00a2ar\u20ab number, please conf\u00a1rm", "card number, please confirm"),
+            ("please \u00fee here, the \u00feack\u0430ge is late", "please be here, the package is late"),
+        ):
+            self.assertEqual(run(disguised, "balanced").text, plain, disguised)
+
+    def test_units_currency_and_spanish_marks_stay(self):
+        for text in ("It is 10 \u00b5m wide and weighs 5 \u00b5g.", "Chapter \u2174 costs 5\u00a2 or 20\u20ab.",
+                     "\u00a1Hola! \u00a1Qu\u00e9 sorpresa!"):
+            self.assertEqual(run(text, "aggressive").text, text)
 
     def test_not_at_the_conservative_level(self):
         text = "Please confirm your account".translate(self.CYRILLIC)
@@ -149,6 +174,11 @@ class LeetspeakTest(unittest.TestCase):
             self.assertEqual(result.text, plain)
             self.assertEqual({step.transform for step in result.steps}, {"leetspeak"})
             self.assertEqual(run(text).text, text)
+
+    def test_doubled_digit_after_two_letters(self):
+        self.assertEqual(run("Get fr33 followers and likes today", "balanced").text, "Get free followers and likes today")
+        for text in ("The G5 and the M14 are on shelf B4.", "Room no00 is closed."):
+            self.assertEqual(run(text, "balanced").text, text)
 
     def test_together_with_lookalike_letters(self):
         # The first letter of each disguised word is Cyrillic.
@@ -319,6 +349,10 @@ class LeaveAloneTest(unittest.TestCase):
             "naïve café résumé",
             "Great job 👍🏽 see you soon",
         )
+
+    def test_accented_phrase_is_not_a_shifted_one(self):
+        text = "The league (Chinese: Qu\u00e1ngu\u00f3 N\u00e1nz\u01d0 L\u00e1nqi\u00fa) was founded in 1995."
+        self.assertEqual(run(text, "aggressive").text, text)
 
     def test_words_that_look_encoded(self):
         self.untouched(

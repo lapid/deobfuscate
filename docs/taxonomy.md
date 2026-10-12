@@ -15,10 +15,10 @@ column are the `tricks` labels used in `data/samples/`. Reasons are in `docs/res
 | `base64`, `base64url` | `SGVsbG8gd29ybGQ=` | conservative | Medium. Result must be valid, printable, and score as English; tokens and keys do not |
 | `hex`, `binary`, `decimal-codes` | `48 65 6c 6c 6f` | conservative | Medium. Hashes, UUIDs and colour codes decode to noise and are rejected |
 | `rot13`, `caesar` | `Uryyb jbeyq` | conservative | Medium. Needs enough words; short real words can be rot13 pairs |
-| `reverse` | `dlrow olleH` | conservative | Medium. Needs enough words; palindromes |
+| `reverse` | `dlrow olleH` | conservative | Medium. Needs enough words; palindromes. A run may continue across a word that reads both ways (`eht no detubed`) if it has 12 letters or more |
 | `tag-characters` | Invisible Unicode tag characters carrying hidden text | conservative | Low. Removed from the text; the hidden content is shown in the step record |
 | `combining-marks` | `H̶e̶l̶l̶o̶` | balanced | Medium. Accents on real letters stay |
-| `homoglyph` | `аccount` with a Cyrillic `а` | balanced | High. Only in mixed-script words, or when the result is a known word |
+| `homoglyph` | `аccount` with a Cyrillic `а` | balanced | High. Only in mixed-script words, or when the result is a known word. Roman-numeral characters and a few symbols (`¢`, `₫`, `∨`, `¡`) are read as letters only inside a word that becomes a known word; `µm` and `5¢` stay |
 | `accent-substitution` | `yōũr pass words`, `taĺk` | balanced | High. Seen in real phishing mail. Remove an accent only when the word is not a known word with it and is one without it; `café` and names stay |
 | `leetspeak` | `h3ll0`, `p@$$w0rd` | balanced | High. Result must be a known word; shorthand such as `l8r`, `sum1` is left alone |
 | `separator` | `f r e e`, `c.l.i.c.k` | balanced | High. Initials, abbreviations, spaced headings |

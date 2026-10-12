@@ -21,16 +21,18 @@ transforms applied. This file is the current state. The reasons are in `JOURNAL.
   looser lookalike variant, `repeated-chars`, `shorthand`, `misspelling` and `emoji-word` at
   `aggressive`. Gaps left open are unticked in
   `PLAN.md`.
-- **Next:** Phase 4 (tune the presets, error analysis, final run on test), when the owner starts
-  it. Then Phase 5, Phase 6.
-- **Numbers on dev:** clean texts changed 1, 1 and 26 of 7,442 at the three levels; recovery
-  (ignoring capitals) 95.5%, 88.0% and 87.9%; real phishing set 81.1% at `balanced` and 89.5% at
-  `aggressive`.
-  Full table in `docs/evaluation.md`.
+- **Phase 4 (started by the owner 2026-10-12):** error analysis and the threshold sweep are
+  done. Left: the single run on the test split, which needs the owner's go-ahead. Rules and
+  thresholds are frozen until then; see the Phase 4 checklist in `PLAN.md`.
+- **Next after that:** Phase 5, Phase 6.
+- **Numbers on dev:** clean texts changed 1, 1 and 24 of 7,442 at the three levels; recovery
+  (ignoring capitals) 96.1%, 92.3% and 90.0%; real phishing set 90.8% at `balanced` and 94.5% at
+  `aggressive`; hand-disguised sentences 15 and 17 of 25.
+  Full table and the sweep in `docs/evaluation.md`.
 - **Known problems:** a lone disguised word with everyday accents, or a lone Greek "a", is left
   alone at `balanced`; a capital hidden behind a leetspeak digit is lost; shifted or reversed words inside clean
-  text recover poorly; the presets have not had a tuning pass; no recogniser yet for key-like
-  tokens or code.
+  text recover poorly; a short text in another language whose words all read as English
+  backwards is reversed ("No pasa nada"); no recogniser yet for key-like tokens or code.
 - **Waiting on the owner:** checking the test half of `data/human/to_disguise.txt` for answers
   typed under the wrong sentence.
 - **Deferred to version 2:** see "Version 2" in `PLAN.md` (evaluation gaps, public demo site).
@@ -127,6 +129,11 @@ Each document has one job. Update it in the same commit as the change it describ
   CC BY-SA data may be committed, with source, address and licence on every row.
 - **Real-world data without a licence** (BitCore) is used locally only and never committed.
 - **Limits:** inputs over 100,000 characters are returned unchanged; layers are followed 4 deep.
+- **Thresholds** (chosen by the dev sweep, 2026-10-12): score 0.50, gain 0.30, 8 letters at
+  `conservative` and `balanced`; 0.45, 0.25, 6 at `aggressive`. `reverse` and `caesar` need 10
+  letters at every level.
+- **Test split is run once**, on the owner's go-ahead, after rules and thresholds are frozen.
+  Nothing is fixed in version 1 in response to its numbers.
 - **Provisional v1 targets:** at most 1% of clean texts changed; 90% exact recovery for lossless
   transforms and encodings; 70% for ambiguous visual tricks.
 - **Evaluation before implementation.** Test sets and metrics come first.

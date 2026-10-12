@@ -35,10 +35,10 @@ class Policy:
     min_letters: int
 
 
-# Starting values; tuned on the dev split in Phase 4.
+# Chosen by a sweep on the dev split (docs/evaluation.md, "Threshold sweep").
 POLICIES = {
-    "conservative": Policy(min_score=0.50, min_gain=0.30, min_letters=10),
-    "balanced": Policy(min_score=0.50, min_gain=0.30, min_letters=10),
+    "conservative": Policy(min_score=0.50, min_gain=0.30, min_letters=8),
+    "balanced": Policy(min_score=0.50, min_gain=0.30, min_letters=8),
     "aggressive": Policy(min_score=0.45, min_gain=0.25, min_letters=6),
 }
 
@@ -100,7 +100,8 @@ class Engine:
             if late and depth:
                 continue
             best: Accepted | None = None
-            together: list[Accepted] = []
+            winner: Transform | None = None
+            proposed: list[tuple[Transform, list[Accepted]]] = []
             for transform in self.transforms:
                 if transform.judged != judged or transform.late != late:
                     continue
@@ -116,14 +117,18 @@ class Engine:
                         verdicts.append(verdict)
                 top = max(verdicts, key=lambda verdict: verdict.weight, default=None)
                 if top is not None and (best is None or top.weight > best.weight):
-                    best, together = top, verdicts
+                    best, winner = top, transform
+                proposed.append((transform, verdicts))
             if best is None:
                 continue
             if judged:
                 return [best]
             # A certain transform decided on the text as a whole, so everything it
             # proposed is applied at once. One at a time, the words applied first
-            # would no longer be there as evidence for the rest.
+            # would no longer be there as evidence for the rest. The same holds for
+            # the other transforms of its group.
+            together = [verdict for transform, verdicts in proposed for verdict in verdicts
+                        if transform is winner or (winner.group and transform.group == winner.group)]
             chosen: list[Accepted] = []
             for verdict in sorted(together, key=lambda verdict: (-verdict.weight, verdict.candidate.start)):
                 if not any(verdict.candidate.start < other.candidate.end and other.candidate.start < verdict.candidate.end

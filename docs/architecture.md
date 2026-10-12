@@ -26,7 +26,8 @@ How the deobfuscator works inside. Read this before adding or changing a transfo
    inside a word would split it and mislead the transforms that read words.
    **All proposals of one certain transform are applied in the same round.** Some of them decide
    on evidence from the whole text; applied one at a time, the words rewritten first would no
-   longer be there as evidence for the rest.
+   longer be there as evidence for the rest. Transforms that share a `group` name (the two
+   lookalike tricks) decide on the same evidence, so their proposals are applied together too.
 4. For a judged candidate, the engine deobfuscates the replacement **itself**, by running the
    whole process on it one layer deeper. This is what handles layers: base64 inside base64, or
    base64 inside rot13. The candidate is judged by what it finally turns into.
@@ -52,8 +53,8 @@ picks a `Policy` in `engine.py`:
 
 | Level | Minimum score | Minimum gain | Minimum letters |
 |---|---|---|---|
-| conservative | 0.50 | 0.30 | 10 |
-| balanced | 0.50 | 0.30 | 10 |
+| conservative | 0.50 | 0.30 | 8 |
+| balanced | 0.50 | 0.30 | 8 |
 | aggressive | 0.45 | 0.25 | 6 |
 
 A transform can ask for more letters than the level does (`min_letters`); Caesar shifts and

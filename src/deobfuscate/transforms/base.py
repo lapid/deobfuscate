@@ -40,6 +40,9 @@ class Transform:
     # They are asked only when no other transform has anything left to propose, so
     # that they never rewrite text that is still encoded ("ur" is rot13 for "he").
     late: bool = False
+    # Certain transforms sharing a group name decide on the same evidence, so what
+    # they propose is applied in the same round.
+    group: str = ""
     # True if proposals may touch spans the engine protects (URLs, paths, hashes).
     ignores_protection: bool = False
     # The fewest letters a result must contain to be judged, if more than the level asks for.

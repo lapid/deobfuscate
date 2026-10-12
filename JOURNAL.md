@@ -578,10 +578,62 @@ Otherwise commit a fetch script and the labels, not the text. Abusive content is
 - **Not done:** no check of these rules against data the rule-writer has not seen; that is the
   test split's job in Phase 4.
 
+### 2026-10-12 — Phase 4 started: error analysis and thresholds (owner started it; details by Claude)
+- **Owner:** go ahead with Claude's recommendation (error analysis on the hand-disguised dev
+  sentences first, then thresholds, then one test run), and make sure the thresholds and the
+  test set are in the plan. `PLAN.md` Phase 4 now lists the sweep, the freeze and the test run
+  step by step.
+- **Hand-disguised dev sentences, 7 to 15 of 25 at `balanced` (Claude):** eight failures had
+  one cause, words mixing lookalike and accented letters.
+  - Roman-numeral characters (`ⅼ`, `ⅴ`, `ⅿ`) were dropped when the lookalike table was built.
+    Now read as letters, only inside a word that becomes a known word.
+  - A Cyrillic letter with a hook or stroke (`ӷ`, `ҫ`, `ҟ`) reads as the letter without.
+  - About twenty letters are read as seen in the dev sentences (`ƅ` b, `ϝ` f, Armenian `ր` n),
+    some with two readings (`þ` p or b); the first that gives a known word is used.
+    **Risk:** this list was learned from 25 sentences by one author. The test half will show
+    whether it carries over.
+  - Four symbols count as letters inside a word (`¢`, `₫`, `∨`, `¡`), known words only.
+    `µm`, `5¢` and Spanish `¡Hola!` stay; covered by unit tests.
+- **Engine: transforms may share a `group` (Claude).** The two lookalike tricks decide on the
+  same evidence but were applied in separate rounds, so accent words lost the lookalike words
+  as evidence. Grouped transforms are applied in the same round. Real phishing set at
+  `balanced`: 81.1% to 89.5% from this and the readings above.
+- **Lookalike, smaller changes (Claude):** disguised words that read as English count towards
+  "the text is English" (a text with one plain word, a name, was skipped); `’` inside a word.
+- **Tried and dropped:** two capitalised words with odd accents as evidence for each other.
+  It recovered 5 more samples and changed two Vietnamese names in a clean text.
+- **Leetspeak (Claude):** two small letters and a doubled `3` or `0` are read (`fr33`); other
+  two-letter stems before a number are still never read (`G5`, `b4`).
+- **Shorthand (Claude):** a form written in capitals comes back capitalised, not in capitals
+  (`TY` to "Thank you"), unless the whole text is in capitals.
+- **Reversal inside clean text, 28% to 42% (Claude):** a run may continue across a word that
+  reads both ways (`eht no detubed`). Such a run needs 12 letters, after it reversed two
+  misspelt words around "is" in a real message, and is not tried when the whole text may be
+  reversed. Words that read both ways at the ends of a run still cannot be placed.
+- **Caesar (Claude):** a span where more than a tenth of the letters are accented is not
+  shifted. Found reading the clean texts changed at `aggressive`: a pinyin phrase was shifted.
+- **Thresholds (Claude, by sweep on dev; table in `docs/evaluation.md`):**
+  - Recovery moves by about one point across the whole swept range. The rules decide, not the
+    margins.
+  - `min_letters` 10 to 8 at `conservative` and `balanced`: 13 more recovered at each, no clean
+    text changed, nothing made worse. `min_score` and `min_gain` unchanged.
+  - `aggressive` unchanged. A score of 0.50 would change one clean text fewer and recover four
+    fewer; kept at 0.45 because the level exists to accept more.
+  - Per-transform: leetspeak reads an unknown name after 2 clear words instead of 3 (12 more
+    recovered, no clean change). `reverse`, `caesar`, `repeated-chars` and `misspelling` limits
+    kept; each lower value changed one more clean text.
+- **Known and not fixed:** "No pasa nada" is reversed at every level: all three words read as
+  English backwards. No guard separates it from real reversed text; recorded as a known problem.
+- **Dev results after all of this:** clean texts changed 1, 1, 24; recovered 96.1%, 92.3%,
+  90.0%; made worse 2, 2, 17; real phishing set 90.8% and 94.5%; hand-disguised 15 and 17 of 25.
+- **Frozen (Claude):** no rule or threshold changes until the test run. The run needs the
+  owner's go-ahead and, if the owner wants, their check of the test-half answers first.
+
 ## Open questions
 
 None needing an answer from the user.
 
 Settled later by experiment:
 
-1. **Final v1 targets:** after the transforms exist and the presets are tuned.
+1. **Final v1 targets:** after the test run. On dev the provisional targets are met (clean
+   texts changed under 1% at every level; encodings 96%; most visual tricks above 70%).

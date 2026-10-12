@@ -24,6 +24,8 @@ NUMBER_LAST = re.compile(r"([A-Za-z]+)(\d+)")
 UNITS = frozenset(
     "st nd rd th s am pm k m g h d x b bn kg km cm mm ml mg px ms hr hrs min mins sec gb mb kb tb hz mph up".split()
 )
+# Two small letters and a doubled "3" or "0", the commonest doubled letters: "fr33", "tr33".
+DOUBLED_LAST = re.compile(r"[a-z]{2}(?:33|00)")
 # "4" and "2" before a word are shorthand for "for" and "to" ("4my", "2go").
 SOUND_FIRST = re.compile(r"[24]([A-Za-z]+)")
 SENTENCE_START = re.compile(r"(?:^|[.!?]\s+|\n\s*)[\"'“‘(]?$")
@@ -31,7 +33,7 @@ MAX_READINGS = 32
 # Words of evidence needed before a short or number-shaped token is rewritten,
 # and before a token is rewritten whose reading is not a known word (a name).
 EVIDENCE_FOR_WEAK = 1
-EVIDENCE_FOR_UNKNOWN = 3
+EVIDENCE_FOR_UNKNOWN = 2
 MIN_STRONG_LENGTH = 4
 
 
@@ -68,6 +70,8 @@ def is_weak(token: str) -> bool:
     if inside.isalpha():
         # A symbol only at the edge: "@mark" is a handle, "print$" a share name.
         return True
+    if DOUBLED_LAST.fullmatch(token):
+        return False
     if match := NUMBER_LAST.fullmatch(token):
         return scorer.is_word(match.group(1))
     if match := NUMBER_FIRST.fullmatch(token):
@@ -95,7 +99,7 @@ class Leetspeak(Transform):
             if number_first and number_first.group(2).lower() in UNITS:
                 continue
             number_last = NUMBER_LAST.fullmatch(token)
-            if number_last and len(number_last.group(1)) <= 2:
+            if number_last and len(number_last.group(1)) <= 2 and not DOUBLED_LAST.fullmatch(token):
                 # A model or a grade: "G5", "M14", "b4".
                 continue
             sound_first = SOUND_FIRST.fullmatch(token)
